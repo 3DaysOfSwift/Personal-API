@@ -138,7 +138,7 @@ behind a collapsed Sources control. Journal text is never replaced by a response
 The context budget remains 6,000 characters, at most 2,000 per Moment. Omitted
 context is disclosed. Model refusals, context overflow, unavailable assets, language
 limitations and service errors are presented as answer failures, never as successful
-match-count responses. The composer sits beneath the introduction with the response below it.
+match-count responses. The composer is bottom-inset with a 96-point resting gap. Query hides the tab bar by default and offers a top navigation toggle. Focusing the composer hides tabs and reduces the gap to 12 points above the keyboard. These are local View presentation states.
 This is still a single-question interface, not persistent multi-turn conversation.
 
 ## Local model reliability

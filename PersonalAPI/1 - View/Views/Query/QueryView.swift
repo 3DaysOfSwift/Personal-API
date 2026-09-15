@@ -3,6 +3,8 @@ import SwiftUI
 struct QueryView: View {
     @Environment(ThemeManager.self) private var theme
     @State private var viewModel = QueryViewModel()
+    @State private var showsTabs = false
+    @FocusState private var isQuestionFocused: Bool
     var body: some View {
         @Bindable var viewModel = viewModel
         NavigationStack {
@@ -13,13 +15,6 @@ struct QueryView: View {
                         Text("A conversation grounded in your memories.")
                             .foregroundStyle(theme.theme.secondary)
                     }
-                HStack {
-                    TextField("Ask about your life…", text: $viewModel.question, axis: .vertical)
-                        .lineLimit(1...5).submitLabel(.send).onSubmit { viewModel.submitSearch() }
-                    Button { viewModel.submitSearch() } label: {
-                        Image(systemName: "arrow.up.circle.fill").font(.title)
-                    }.accessibilityLabel("Ask Personal API").disabled(!viewModel.canSearch)
-                }.padding(16).background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
                     if viewModel.isSearching || viewModel.searched {
                         HStack {
                             Spacer(minLength: 32)
@@ -63,8 +58,47 @@ struct QueryView: View {
                     }
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
             }
+            .scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    HStack(alignment: .bottom) {
+                        TextField("Ask about your life…", text: $viewModel.question, axis: .vertical)
+                            .lineLimit(1...5).focused($isQuestionFocused)
+                            .submitLabel(.send).onSubmit { viewModel.submitSearch() }
+                        Button { viewModel.submitSearch() } label: {
+                            Image(systemName: "arrow.up.circle.fill").font(.title)
+                                .frame(minWidth: 44, minHeight: 44)
+                        }.accessibilityLabel("Ask Personal API").disabled(!viewModel.canSearch)
+                    }
+                    .padding(16)
+                    .background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
+                    .padding(.horizontal, 20)
+                    // Keep the resting composer comfortably above bottom navigation.
+                    // With the keyboard open, its safe area already lifts the composer.
+                    Color.clear.frame(height: isQuestionFocused ? 12 : 96)
+                        .allowsHitTesting(false).accessibilityHidden(true)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isQuestionFocused = false
+                        showsTabs.toggle()
+                    } label: {
+                        Label(showsTabs ? "Hide tabs" : "Show tabs", systemImage: "square.grid.2x2")
+                            .font(.subheadline)
+                            .frame(minHeight: 44)
+                    }
+                    .accessibilityLabel(showsTabs ? "Hide navigation tabs" : "Show navigation tabs")
+                    .accessibilityHint("Show tabs to switch to Profile, Training or Settings")
+                }
+            }
+            .onChange(of: isQuestionFocused) { _, focused in
+                if focused { showsTabs = false }
+            }
             .navigationTitle("Query").navigationBarTitleDisplayMode(.inline)
             .onDisappear { viewModel.cancelSearch() }
         }
+        .toolbar(showsTabs ? .visible : .hidden, for: .tabBar)
     }
 }
