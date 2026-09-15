@@ -1,3 +1,13 @@
+# Unsupported answer correction — 15 September 2026
+
+The user reported an unrecorded claim of loneliness. That phrase matched a fictional
+style example in the answer instructions. This is strong evidence of example leakage,
+not evidence of learning from feedback. Removed the factual example; added explicit
+question relevance and insufficient-evidence instructions. No journal data was changed.
+Live validation must repeat the original question and check that the answer admits
+missing evidence about parenting instead of supplying an invented emotion.
+Feedback buttons remain session-only and do not train or update the local model.
+
 # Reliability update — 15 September 2026
 
 - The user supplied evidence of a model refusal followed by a successful generated

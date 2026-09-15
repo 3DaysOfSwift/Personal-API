@@ -159,5 +159,5 @@ not proof that model refusals or inaccurate answers have been eliminated.
 Answer instructions address the journal owner directly as you/your, mapping first-person
 memories to a second-person response. Relationship-first answers use recorded details
 only. Perceptions remain attributed and time-bounded; the prompt must not infer "always",
-locations or stronger claims than the source supports. A fictional example teaches voice
-without importing the user’s private memories into the application’s prompt template.
+locations or stronger claims than the source supports. Style instructions contain no fictional personal facts: an earlier example contaminated
+a live response with an unsupported claim of loneliness and was removed.
