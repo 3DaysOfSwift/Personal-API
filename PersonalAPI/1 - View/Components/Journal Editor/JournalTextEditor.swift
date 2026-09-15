@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// The full rounded surface is the text view, including its internal padding.
-/// Native text selection and scrolling handle touches without an extra tap recognizer.
+/// Natiove text selection and scrolling handle touches without an extra tap recognizer.
 struct JournalTextEditor: UIViewRepresentable {
   @Binding var text: String
   @Binding var isEditing: Bool

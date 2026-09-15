@@ -5,9 +5,12 @@ import SwiftUI
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
-      AppModel.shared.applicationDidFinishLaunching()
-    }
+    #if DEBUG
+      if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+        return true
+      }
+    #endif
+    AppModel.shared.applicationDidFinishLaunching()
     return true
   }
 }
@@ -18,11 +21,15 @@ import SwiftUI
   var body: some Scene {
     WindowGroup {
       Group {
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
+        #if DEBUG
+          if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
+            RootView()
+          } else {
+            Color.clear
+          }
+        #else
           RootView()
-        } else {
-          Color.clear
-        }
+        #endif
       }
       .environment(theme)
       .buttonStyle(PersonalAPIButtonStyle())

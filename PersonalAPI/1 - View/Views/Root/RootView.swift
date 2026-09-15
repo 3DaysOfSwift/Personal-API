@@ -22,7 +22,7 @@ struct RootView: View {
             Label {
               Text("Personal API")
             } icon: {
-              Image(uiImage: PersonalAPITabLogo.image)
+              Image("PersonalAPITab")
                 .renderingMode(.original)
             }
           }.tag(AppTab.personalAPI)
