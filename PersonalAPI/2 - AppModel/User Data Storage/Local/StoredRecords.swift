@@ -9,6 +9,7 @@ import SwiftData
     var source: String = "manual"
     var analysisData: Data?
     var processingState: String = "pending"
+    func replaceTextFromUserEdit(_ text: String) { self.text = text }
     init(text: String, happenedAt: Date? = nil) {
         self.text = text
         self.happenedAt = happenedAt

@@ -237,3 +237,13 @@ Validation: shared tests cover automatic extraction, completed-entry backfill, n
 qualifications, failure/retry, original-source answer payloads, stale/orphan exclusion,
 legacy preservation, repeat extraction, reopen and export. iPhone UI and migration of an
 installed pre-change store still require Xcode/device validation.
+
+## Life Map experiment
+
+LifeMapFeature/LifeMapManager owns source-backed event candidates; LifeMapExtractor performs on-device inference as an actor. LifeMapViewModel exposes this feature to LifeMapView. AppModel supplies a shared read-only journal repository. Derived cache is in-memory and revision checked; there is no schema/export change. See Documentation/LIFE-MAP-EXPERIMENT.md for removal steps and limitations.
+
+## Journal maintenance in Settings
+
+Settings opens JournalEntriesView and EditJournalEntryView, each with its own adjacent ViewModel. Both use MomentsFeature; MomentsManager owns validation and serialized publication. LocalDataStore atomically edits/deletes the source and removes its derived facts. Edits retain the ID, recorded date and source, reset metadata, and request reprocessing. Revision checks reject stale editor saves/deletes, and in-flight analysis cannot overwrite an edited entry. Life Map revalidates its source cache on refresh; new queries and exports read current storage. Existing saved conversations and files already exported are historical copies and are not rewritten.
+
+Validation includes durable reopen/export after edit/delete, derived-fact invalidation, stale edit rejection, failed deletion publication, failed-save draft retention, shared list updates and processing/edit races. No storage schema migration is required. iPhone UI runtime checks remain separate from shared model tests.

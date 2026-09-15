@@ -10,6 +10,23 @@ actor MemoryRepository: PersonalDataRepository {
     func setFailure(_ value: Bool) { fails = value }
     func loadMoments() throws -> [MomentSnapshot] { momentLoads += 1; if fails { throw TestFailure.unavailable }; return moments }
     func saveMoment(_ moment: MomentSnapshot) throws { if fails { throw TestFailure.unavailable }; moments.insert(moment, at: 0) }
+    func updateMoment(_ original: MomentSnapshot, text: String) throws -> MomentSnapshot {
+        if fails { throw TestFailure.unavailable }
+        guard let index = moments.firstIndex(where: { $0.id == original.id }) else { throw MomentError.missingMoment }
+        guard moments[index].text == original.text else { throw MomentError.changedMoment }
+        let old = moments[index]
+        moments[index] = .init(id: old.id, text: text, createdAt: old.createdAt, happenedAt: old.happenedAt,
+                              source: old.source, analysisData: nil, processingState: "pending")
+        facts.removeAll { $0.derivation?.momentID == original.id }
+        return moments[index]
+    }
+    func deleteMoment(_ original: MomentSnapshot) throws {
+        if fails { throw TestFailure.unavailable }
+        guard let current = moments.first(where: { $0.id == original.id }) else { throw MomentError.missingMoment }
+        guard current.text == original.text else { throw MomentError.changedMoment }
+        moments.removeAll { $0.id == original.id }
+        facts.removeAll { $0.derivation?.momentID == original.id }
+    }
     func saveAnalysis(_ analysis: MomentAnalysis, momentID: UUID) throws -> MomentSnapshot {
         if fails { throw TestFailure.unavailable }
         guard let index = moments.firstIndex(where: { $0.id == momentID }) else { throw MomentError.missingMoment }
@@ -70,7 +87,8 @@ actor FailingProcessor: MomentProcessor {
                        query: query,
                        authentication: AuthenticationManager(client: authentication, preferences: preferences),
                        settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile),
-                       conversations: ConversationsManager(repository: MemoryConversationRepository(), query: query, now: now))
+                       conversations: ConversationsManager(repository: MemoryConversationRepository(), query: query, now: now),
+                       lifeMap: LifeMapManager(repository: repository, extractor: LifeMapExtractor()))
     }
 }
 

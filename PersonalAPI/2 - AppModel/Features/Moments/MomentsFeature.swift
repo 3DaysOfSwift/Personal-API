@@ -10,6 +10,8 @@ import Foundation
     func loadIfRequired() async
     func refresh() async
     func recordMoment(text: String, happenedAt: Date?) async throws
+    func updateMoment(_ original: MomentSnapshot, text: String) async throws
+    func deleteMoment(_ original: MomentSnapshot) async throws
     func enrichPendingMoments() async
     func regenerateMetadata() async throws
 }

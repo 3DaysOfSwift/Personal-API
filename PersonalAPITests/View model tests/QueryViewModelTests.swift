@@ -14,6 +14,23 @@ import XCTest
         XCTAssertEqual(vm.question, "")
         XCTAssertEqual(vm.answer(for: vm.turns[0]), "Your recorded answer.")
     }
+    func testFreshLaunchStartsNewChatAndKeepsHistoryAvailable() async throws {
+        let store = MemoryConversationRepository()
+        let previous = ConversationsManager(repository: store, query: ConversationQueryStub(), now: { Date() })
+        let savedID = UUID()
+        try await previous.send("Previous conversation", in: savedID)
+        let relaunched = ConversationsManager(repository: store, query: ConversationQueryStub(), now: { Date() })
+        let vm = QueryViewModel(chats: relaunched)
+        await vm.load()
+        XCTAssertNotEqual(vm.conversationID, savedID)
+        XCTAssertTrue(vm.turns.isEmpty)
+        XCTAssertTrue(vm.question.isEmpty)
+        XCTAssertEqual(vm.conversations.count, 1)
+        vm.open(savedID)
+        await vm.load()
+        XCTAssertEqual(vm.conversationID, savedID)
+        XCTAssertEqual(vm.turns.first?.question, "Previous conversation")
+    }
     func testFailedSaveKeepsDraft() async {
         let store = MemoryConversationRepository()
         let vm = QueryViewModel(chats: ConversationsManager(repository: store, query: ConversationQueryStub(), now: { Date() }))

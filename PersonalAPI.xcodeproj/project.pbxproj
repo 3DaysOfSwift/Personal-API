@@ -70,6 +70,20 @@
 		F4AD92AA43C7ED80037CEBA6 /* MomentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC82A82C61395138BEBA58E9 /* MomentDetailView.swift */; };
 		FCA78E7B3A82D6F6A3C32505 /* AppColourTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3683F5973A632066D6ABEB0F /* AppColourTheme.swift */; };
 		FE18F0F3CF30D53A8326E73B /* LocalDeviceAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1DB40382E4C15963838061 /* LocalDeviceAuthentication.swift */; };
+		6457A709B6384172920C09C4 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6946D2487ECC44F59A7D0FBF /* ExportView.swift */; };
+		ED7A73F5B3F741C38287F798 /* ExportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D185941849534A17ABE7A3EE /* ExportViewModel.swift */; };
+F4B514F38970464BBC7CBA2E = {isa = PBXBuildFile; fileRef = 159F81EA84024D6D9AFC73E4; };
+38787148099440E9887C8775 = {isa = PBXBuildFile; fileRef = 1FAA14BE33A04027A48D3AAE; };
+5DCB28AB255B48F48C455BAD = {isa = PBXBuildFile; fileRef = 62B1FB9276B74FDD809D03B7; };
+E188FE2BD0FF4A52861C9534 = {isa = PBXBuildFile; fileRef = EBF12943E6544773BEAA496D; };
+A6DDCCA51AB348DEA4512B27 = {isa = PBXBuildFile; fileRef = 2FC6D983A97F4B8DB8B7D8EC; };
+B14D5E14F4184C01B4E0A92F = {isa = PBXBuildFile; fileRef = 6D0152D228A549CFA4F360E8; };
+C49B57062FE346DCB4856731 = {isa = PBXBuildFile; fileRef = 0F6E498055EE473687B18989; };
+D282F5500B4B487A8563EE1D = {isa = PBXBuildFile; fileRef = 2CF4565325484021B444C394; };
+08D7714BD6EE423DB7800D3C = {isa = PBXBuildFile; fileRef = 0120D60B657E40619612AB3A; };
+35D71863FC13465FAEC931C5 = {isa = PBXBuildFile; fileRef = 009EEDE57DBC427DB0229345; };
+C70A3EDC3EF844CB908BC3B0 = {isa = PBXBuildFile; fileRef = 22D9BA4EFFA94B819ACBCBB6; };
+CD3808954B1F4A13B7AC37E6 = {isa = PBXBuildFile; fileRef = C880AEDE0B2F4EEDB62A344A; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -148,6 +162,20 @@
 		F62132CD2DEAD6905556CEE2 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		F7C542D00BCBAEA22B34DABD /* PersonalFactSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalFactSnapshot.swift; sourceTree = "<group>"; };
 		F8ED2969AD8EFDC5A28356C0 /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
+		6946D2487ECC44F59A7D0FBF /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		D185941849534A17ABE7A3EE /* ExportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportViewModel.swift; sourceTree = "<group>"; };
+159F81EA84024D6D9AFC73E4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeMapFeature.swift; sourceTree = "<group>"; };
+1FAA14BE33A04027A48D3AAE = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeMapExtractor.swift; sourceTree = "<group>"; };
+62B1FB9276B74FDD809D03B7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeMapManager.swift; sourceTree = "<group>"; };
+EBF12943E6544773BEAA496D = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeMapView.swift; sourceTree = "<group>"; };
+2FC6D983A97F4B8DB8B7D8EC = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeMapViewModel.swift; sourceTree = "<group>"; };
+6D0152D228A549CFA4F360E8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeMapTests.swift; sourceTree = "<group>"; };
+0F6E498055EE473687B18989 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntriesView.swift; sourceTree = "<group>"; };
+2CF4565325484021B444C394 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntriesViewModel.swift; sourceTree = "<group>"; };
+0120D60B657E40619612AB3A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditJournalEntryView.swift; sourceTree = "<group>"; };
+009EEDE57DBC427DB0229345 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditJournalEntryViewModel.swift; sourceTree = "<group>"; };
+22D9BA4EFFA94B819ACBCBB6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntriesViewModelTests.swift; sourceTree = "<group>"; };
+C880AEDE0B2F4EEDB62A344A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditJournalEntryViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +221,7 @@
 		13A738DA87228BAB6FC6E84D /* Features */ = {
 			isa = PBXGroup;
 			children = (
+B22CBE11B1A949E9AD971F38 /* Life Map */,
 				EF45F6A25ED2414BACCA6CCD /* Conversations */,
 				4788A37DB47EB27FED8B37A9 /* Authentication */,
 				535C0C111500B3F4A1081745 /* Moments */,
@@ -322,7 +351,9 @@
 				85864D05CC6C556EB3387C4F /* ProfileViewModelTests.swift */,
 				DB0CF2FD045FD30F3B409B17 /* QueryViewModelTests.swift */,
 				70D5C7AF32E3E0E524AFA862 /* RootViewModelTests.swift */,
-				F8ED2969AD8EFDC5A28356C0 /* SettingsViewModelTests.swift */,
+				22D9BA4EFFA94B819ACBCBB6,
+C880AEDE0B2F4EEDB62A344A,
+F8ED2969AD8EFDC5A28356C0 /* SettingsViewModelTests.swift */,
 				8F1EF9246AAABBBD6FE51E62 /* TrainingViewModelTests.swift */,
 			);
 			path = "View model tests";
@@ -371,6 +402,7 @@
 		B863EFD4E41ECE7749E9E864 /* AppModel tests */ = {
 			isa = PBXGroup;
 			children = (
+6D0152D228A549CFA4F360E8,
 				20AC8B018D2D48889C7A0FDC /* ConversationsManagerTests.swift */,
 				A1A100000000000000000001 /* QueryManagerTests.swift */,
 				44DEB2D1F4B2EF46E0577F33 /* AppModelTests.swift */,
@@ -385,13 +417,17 @@
 		BCDF858F8D2592A1C5EDA8CE /* Views */ = {
 			isa = PBXGroup;
 			children = (
+73AAE8C132D54592B612DE8C /* Life Map */,
 				1DA3900899AC105DB32DA925 /* Lock */,
 				635436D2D6DC6AF66FD954B3 /* Moment Detail */,
 				0F9ABF527F20323BC2542CC3 /* Onboarding */,
 				60E296E591C81A45A5FA8073 /* Profile */,
 				F63FDB9CFC702334E2C4A6F9 /* Query */,
 				FC34F2D7754B6CDDD635E26A /* Root */,
-				D6B8D1C94B5EE569EEE7FC3E /* Settings */,
+				F7B9F45888D842F093671748,
+E005630B799049649A29E2E4,
+D6B8D1C94B5EE569EEE7FC3E /* Settings */,
+				B52B612480D44DF9BE9701F2 /* Export */,
 				FFFB4945B34DF5AF16BEF8C8 /* Training */,
 			);
 			path = Views;
@@ -479,6 +515,11 @@
 			path = Training;
 			sourceTree = "<group>";
 		};
+		B52B612480D44DF9BE9701F2 /* Export */ = {isa = PBXGroup; children = (6946D2487ECC44F59A7D0FBF /* ExportView.swift */,D185941849534A17ABE7A3EE /* ExportViewModel.swift */,); path = Export; sourceTree = "<group>"; };
+B22CBE11B1A949E9AD971F38 = {isa = PBXGroup; children = (159F81EA84024D6D9AFC73E4 /* LifeMapFeature.swift */,1FAA14BE33A04027A48D3AAE /* LifeMapExtractor.swift */,62B1FB9276B74FDD809D03B7 /* LifeMapManager.swift */,); path = "Life Map"; sourceTree = "<group>"; };
+73AAE8C132D54592B612DE8C = {isa = PBXGroup; children = (EBF12943E6544773BEAA496D /* LifeMapView.swift */,2FC6D983A97F4B8DB8B7D8EC /* LifeMapViewModel.swift */,); path = "Life Map"; sourceTree = "<group>"; };
+F7B9F45888D842F093671748 = {isa = PBXGroup; children = (0F6E498055EE473687B18989,2CF4565325484021B444C394,); path = "Journal Entries"; sourceTree = "<group>"; };
+E005630B799049649A29E2E4 = {isa = PBXGroup; children = (0120D60B657E40619612AB3A,009EEDE57DBC427DB0229345,); path = "Edit Journal Entry"; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -569,6 +610,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+CD3808954B1F4A13B7AC37E6,
+C70A3EDC3EF844CB908BC3B0,
 				3EC410A720C140F08766CF09 /* ConversationsManagerTests.swift in Sources */,
 				A1A100000000000000000002 /* QueryManagerTests.swift in Sources */,
 				ABD2676DCC872A594DECC62F /* AppModelTests.swift in Sources */,
@@ -582,7 +625,8 @@
 				DC3EEA6DF0E8DB303AC85D91 /* ProfileViewModelTests.swift in Sources */,
 				31CC69A8D624A32635618037 /* QueryViewModelTests.swift in Sources */,
 				9D894402E893B73107D41C60 /* RootViewModelTests.swift in Sources */,
-				1035236520E3BEEE591605CF /* SettingsViewModelTests.swift in Sources */,
+				B14D5E14F4184C01B4E0A92F,
+1035236520E3BEEE591605CF /* SettingsViewModelTests.swift in Sources */,
 				16A01B214CE6BF2B18F81C4C /* TrainingViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -591,6 +635,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+35D71863FC13465FAEC931C5,
+08D7714BD6EE423DB7800D3C,
+D282F5500B4B487A8563EE1D,
+C49B57062FE346DCB4856731,
 				CAFA00000000000000000004 /* LocalQueryIndex.swift in Sources */,
 				898E7481477B444E95DF051C /* LocalConversationStore.swift in Sources */,
 				43573CCC962E4AF5873DEE0C /* ConversationRepository.swift in Sources */,
@@ -612,7 +660,14 @@
 				4048D0A8D237C584E1536096 /* RootView.swift in Sources */,
 				11AB9F5DD8DA022D3ED3A542 /* RootViewModel.swift in Sources */,
 				90B9A4C825A2AD9AC74675EB /* ExportDocument.swift in Sources */,
-				B0DD9FCED53CC97FF7BE7622 /* SettingsView.swift in Sources */,
+				6457A709B6384172920C09C4 /* ExportView.swift in Sources */,
+				ED7A73F5B3F741C38287F798 /* ExportViewModel.swift in Sources */,
+				F4B514F38970464BBC7CBA2E /* LifeMapFeature.swift */,
+ 38787148099440E9887C8775 /* LifeMapExtractor.swift */,
+ 5DCB28AB255B48F48C455BAD /* LifeMapManager.swift */,
+ E188FE2BD0FF4A52861C9534 /* LifeMapView.swift */,
+ A6DDCCA51AB348DEA4512B27 /* LifeMapViewModel.swift */,
+ B0DD9FCED53CC97FF7BE7622 /* SettingsView.swift in Sources */,
 				5F9BE40C04D6F6568FA9499C /* SettingsViewModel.swift in Sources */,
 				9AD182715958F2CBDB9A5930 /* TrainingView.swift in Sources */,
 				607F1910587537BDAED648A2 /* TrainingViewModel.swift in Sources */,

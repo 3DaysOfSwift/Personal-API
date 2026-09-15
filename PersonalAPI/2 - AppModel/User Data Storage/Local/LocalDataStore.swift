@@ -39,6 +39,33 @@ actor LocalDataStore: PersonalDataRepository {
         context.insert(record)
         try context.save()
     }
+    private func removeDerivedFacts(for id: UUID, in context: ModelContext) throws {
+        for fact in try context.fetch(FetchDescriptor<PersonalFact>()) {
+            if let data = fact.derivationData,
+               try JSONDecoder().decode(FactDerivation.self, from: data).momentID == id {
+                context.delete(fact)
+            }
+        }
+    }
+    func updateMoment(_ original: MomentSnapshot, text: String) throws -> MomentSnapshot {
+        let context = try makeContext()
+        guard let record = try context.fetch(FetchDescriptor<Moment>()).first(where: { $0.id == original.id }) else { throw MomentError.missingMoment }
+        guard record.text == original.text else { throw MomentError.changedMoment }
+        record.replaceTextFromUserEdit(text)
+        record.analysisData = nil
+        record.processingState = "pending"
+        try removeDerivedFacts(for: original.id, in: context)
+        try context.save()
+        return snapshot(record)
+    }
+    func deleteMoment(_ original: MomentSnapshot) throws {
+        let context = try makeContext()
+        guard let record = try context.fetch(FetchDescriptor<Moment>()).first(where: { $0.id == original.id }) else { throw MomentError.missingMoment }
+        guard record.text == original.text else { throw MomentError.changedMoment }
+        try removeDerivedFacts(for: original.id, in: context)
+        context.delete(record)
+        try context.save()
+    }
     func saveAnalysis(_ analysis: MomentAnalysis, momentID: UUID) throws -> MomentSnapshot {
         let context = try makeContext()
         guard let record = try context.fetch(FetchDescriptor<Moment>()).first(where: { $0.id == momentID }) else { throw MomentError.missingMoment }

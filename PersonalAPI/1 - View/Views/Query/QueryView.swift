@@ -83,15 +83,26 @@ struct QueryView: View {
                                         }.font(.subheadline).foregroundStyle(theme.theme.secondary)
                                     }
                                     if turn.id == viewModel.turns.last?.id {
-                                        Button("Answer again", systemImage: "arrow.clockwise") { viewModel.answerAgain() }
-                                            .disabled(viewModel.isBusy)
+                                        Button { viewModel.answerAgain() } label: {
+                                            Label("Answer again", systemImage: "arrow.clockwise")
+                                                .foregroundStyle(theme.theme.interactiveAccent)
+                                                .frame(minHeight: 40)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .opacity(viewModel.isBusy ? 0.4 : 1)
+                                        .disabled(viewModel.isBusy)
                                         Button {
                                             memoryQuestion = turn.question
                                             isQuestionFocused = false
                                             showsMemoryEntry = true
                                         } label: {
                                             Label("Log a moment about this", systemImage: "square.and.pencil")
-                                        }.disabled(viewModel.isBusy)
+                                                .foregroundStyle(theme.theme.interactiveAccent)
+                                                .frame(minHeight: 40)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .opacity(viewModel.isBusy ? 0.4 : 1)
+                                        .disabled(viewModel.isBusy)
                                         if turn.result?.needsMoreMemories == true {
                                             Text("The more you log, the more useful your Personal API can become.")
                                                 .font(.caption).foregroundStyle(theme.theme.secondary)
@@ -139,7 +150,8 @@ struct QueryView: View {
                     }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                         .environment(theme)
-                ))
+                ), bottomOnOpenID: viewModel.loaded && !viewModel.turns.isEmpty ? viewModel.conversationID : nil,
+                   contentReady: viewModel.loaded || viewModel.error != nil)
                 .onChange(of: viewModel.isBusy) { _, busy in
                     if !busy { submittedTurnCount = nil; submittedText = "" }
                 }
@@ -167,7 +179,8 @@ struct QueryView: View {
                 if isQuestionFocused {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button { isQuestionFocused = false } label: {
-                            Text("Done").foregroundStyle(theme.theme.interactiveAccent).frame(minHeight: 40)
+                            Text("Done").foregroundStyle(theme.theme.interactiveAccent)
+                                .padding(.horizontal, 12).frame(minHeight: 40)
                         }
                             .buttonStyle(.plain)
                             .tint(theme.theme.interactiveAccent)
@@ -210,7 +223,8 @@ struct QueryView: View {
                 }
                 .navigationTitle("Saved chats")
                 .toolbar { Button { showsHistory = false } label: {
-                    Text("Done").foregroundStyle(theme.theme.interactiveAccent).frame(minHeight: 40)
+                    Text("Done").foregroundStyle(theme.theme.interactiveAccent)
+                                .padding(.horizontal, 12).frame(minHeight: 40)
                 }.buttonStyle(.plain).tint(theme.theme.interactiveAccent) }
                 .confirmationDialog("Delete this conversation? Your journal entries will remain.", isPresented: Binding(
                     get: { pendingDeletion != nil }, set: { if !$0 { pendingDeletion = nil } }
@@ -269,14 +283,66 @@ struct QueryView: View {
 /// Its insets and offset use the keyboard's native animation transaction.
 private struct ChatScrollView: UIViewControllerRepresentable {
     let content: AnyView
-    func makeUIViewController(context: Context) -> Controller { Controller(content: content) }
+    let bottomOnOpenID: UUID?
+    let contentReady: Bool
+    func makeUIViewController(context: Context) -> Controller {
+        let controller = Controller(content: content)
+        controller.configureOpening(bottomOnOpenID, ready: contentReady)
+        return controller
+    }
     func updateUIViewController(_ controller: Controller, context: Context) {
+        controller.configureOpening(bottomOnOpenID, ready: contentReady)
         controller.host.rootView = content
+        controller.view.setNeedsLayout()
     }
     final class Controller: UIViewController {
         let scrollView = UIScrollView()
         let host: UIHostingController<AnyView>
         private var keyboardIsVisible = false
+        private var openingID: UUID?
+        private var needsOpeningScroll = true
+        private var contentReady = false
+        private var openingScheduled = false
+
+        func configureOpening(_ id: UUID?, ready: Bool) {
+            if openingID != id || contentReady != ready {
+                openingID = id
+                contentReady = ready
+                needsOpeningScroll = true
+                scrollView.alpha = 0
+            }
+        }
+        override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            needsOpeningScroll = true
+            scrollView.alpha = 0
+            view.setNeedsLayout()
+        }
+        override func viewDidLayoutSubviews() {
+            super.viewDidLayoutSubviews()
+            guard needsOpeningScroll, contentReady, !openingScheduled,
+                  scrollView.bounds.width > 0, scrollView.bounds.height > 0 else { return }
+            openingScheduled = true
+            // Let the newly assigned SwiftUI root complete its layout before using
+            // contentSize. Keep the transcript hidden throughout that first pass.
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.openingScheduled = false
+                guard self.needsOpeningScroll, self.contentReady, self.view.window != nil else { return }
+                self.host.view.invalidateIntrinsicContentSize()
+                self.view.layoutIfNeeded()
+                self.scrollView.layoutIfNeeded()
+                guard self.scrollView.contentSize.height > 0 else { return }
+                let bottom = self.openingID == nil ? 0 : max(0,
+                    self.scrollView.contentSize.height - self.scrollView.bounds.height + self.scrollView.adjustedContentInset.bottom)
+                UIView.performWithoutAnimation {
+                    self.scrollView.setContentOffset(CGPoint(x: 0, y: bottom), animated: false)
+                    self.scrollView.layoutIfNeeded()
+                    self.scrollView.alpha = 1
+                }
+                self.needsOpeningScroll = false
+            }
+        }
         init(content: AnyView) {
             host = UIHostingController(rootView: content)
             super.init(nibName: nil, bundle: nil)

@@ -61,6 +61,24 @@ import Observation
         moments.insert(moment, at: 0)
         requestEnrichment()
     }
+    func updateMoment(_ original: MomentSnapshot, text: String) async throws {
+        guard canRecord(text) else { throw MomentError.emptyMoment }
+        await acquire()
+        defer { release() }
+        try Task.checkCancellation()
+        let updated = try await repository.updateMoment(original, text: text)
+        if let index = moments.firstIndex(where: { $0.id == original.id }) { moments[index] = updated }
+        indexedSources.removeValue(forKey: original.id)
+        requestEnrichment()
+    }
+    func deleteMoment(_ original: MomentSnapshot) async throws {
+        await acquire()
+        defer { release() }
+        try Task.checkCancellation()
+        try await repository.deleteMoment(original)
+        moments.removeAll { $0.id == original.id }
+        indexedSources.removeValue(forKey: original.id)
+    }
     private func requestEnrichment() {
         guard enrichmentTask == nil else { return }
         enrichmentTask = Task { [self] in
@@ -73,16 +91,20 @@ import Observation
         await enrichmentTask?.value
     }
     private func analysePendingSources() async {
-        var attempted: Set<UUID> = []
+        var attempted: [UUID: String] = [:]
         enrichmentError = nil
         while let moment = moments.first(where: {
-            ($0.processingState != "complete" || indexedSources[$0.id] != $0.text) && !attempted.contains($0.id)
+            ($0.processingState != "complete" || indexedSources[$0.id] != $0.text) && attempted[$0.id] != $0.text
         }) {
-            attempted.insert(moment.id)
+            attempted[moment.id] = moment.text
             if moment.processingState != "complete" {
                 do {
                     let result = try await processor.analyse(MomentInput(text: moment.text, createdAt: moment.createdAt))
                     await acquire()
+                    guard moments.contains(where: { $0.id == moment.id && $0.text == moment.text }) else {
+                        release()
+                        continue
+                    }
                     do {
                         let updated = try await repository.saveAnalysis(result, momentID: moment.id)
                         if let index = moments.firstIndex(where: { $0.id == moment.id }) { moments[index] = updated }

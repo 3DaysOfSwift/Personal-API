@@ -65,7 +65,8 @@ struct TrainingView: View {
                             if isMomentFocused { isMomentFocused = false }
                             else { dismiss() }
                         } label: {
-                            Text("Done").foregroundStyle(theme.theme.interactiveAccent).frame(minHeight: 40)
+                            Text("Done").foregroundStyle(theme.theme.interactiveAccent)
+                                .padding(.horizontal, 12).frame(minHeight: 40)
                         }
                         .buttonStyle(.plain)
                         .tint(theme.theme.interactiveAccent)

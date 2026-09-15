@@ -3,6 +3,7 @@ import Foundation
 /// The single live graph. Feature rules and screen state belong to their owners.
 @MainActor final class AppModel {
     static let shared = AppModel.live()
+    let lifeMapFeature: any LifeMapFeature
     let momentsFeature: any MomentsFeature
     let profileFeature: any ProfileFeature
     let conversationsFeature: any ConversationsFeature
@@ -12,7 +13,8 @@ import Foundation
     private var launchTask: Task<Void, Never>?
 
     init(moments: any MomentsFeature, profile: any ProfileFeature, query: any QueryFeature,
-         authentication: any AuthenticationFeature, settings: any SettingsFeature, conversations: any ConversationsFeature) {
+         authentication: any AuthenticationFeature, settings: any SettingsFeature, conversations: any ConversationsFeature, lifeMap: any LifeMapFeature) {
+        lifeMapFeature = lifeMap
         conversationsFeature = conversations
         momentsFeature = moments; profileFeature = profile; queryFeature = query
         authenticationFeature = authentication; settingsFeature = settings
@@ -29,7 +31,8 @@ import Foundation
         return AppModel(moments: moments, profile: profile,
                         query: query,
                         authentication: AuthenticationManager(client: LocalDeviceAuthentication(), preferences: preferences),
-                        settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile), conversations: conversations)
+                        settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile), conversations: conversations,
+                        lifeMap: LifeMapManager(repository: repository, extractor: LifeMapExtractor()))
     }
     func applicationDidFinishLaunching() {
         guard launchTask == nil else { return }

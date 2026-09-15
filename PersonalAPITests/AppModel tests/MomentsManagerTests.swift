@@ -95,3 +95,55 @@ extension MomentsManagerTests {
         XCTAssertTrue(facts.isEmpty)
     }
 }
+
+extension MomentsManagerTests {
+    func testEditingReindexesAndFailedDeleteKeepsPublishedEntry() async throws {
+        let graph = TestAppModelFactory()
+        let feature = graph.app.momentsFeature
+        try await feature.recordMoment(text: "I love teaching.", happenedAt: nil)
+        await feature.enrichPendingMoments()
+        let original = try XCTUnwrap(feature.moments.first)
+        do { try await feature.updateMoment(original, text: " \n "); XCTFail("Expected empty error") } catch { }
+        try await feature.updateMoment(original, text: "I love making apps.")
+        await feature.enrichPendingMoments()
+        let edited = try XCTUnwrap(feature.moments.first)
+        XCTAssertEqual(edited.analysis?.title, "I love making apps.")
+        let facts = try await graph.repository.loadFacts()
+        XCTAssertEqual(facts.map(\.value), [edited.text])
+        await graph.repository.setFailure(true)
+        do { try await feature.deleteMoment(edited); XCTFail("Expected failure") } catch { }
+        XCTAssertEqual(feature.moments, [edited])
+        await graph.repository.setFailure(false)
+        try await feature.deleteMoment(edited)
+        XCTAssertTrue(feature.moments.isEmpty)
+    }
+}
+
+private actor SuspendedEditProcessor: MomentProcessor {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var ready = false
+    func started() -> Bool { ready }
+    func resume() { continuation?.resume(); continuation = nil }
+    func analyse(_ input: MomentInput) async -> MomentAnalysis {
+        if input.text == "Before" {
+            await withCheckedContinuation { continuation = $0; ready = true }
+        }
+        return .init(title: input.text, processor: "test", processedAt: Date())
+    }
+}
+
+extension MomentsManagerTests {
+    func testOldProcessingCannotOverwriteAnEdit() async throws {
+        let repository = MemoryRepository()
+        let processor = SuspendedEditProcessor()
+        let manager = MomentsManager(repository: repository, processor: processor, now: { Date() })
+        try await manager.recordMoment(text: "Before", happenedAt: nil)
+        while !(await processor.started()) { await Task.yield() }
+        let original = try XCTUnwrap(manager.moments.first)
+        try await manager.updateMoment(original, text: "After")
+        await processor.resume()
+        await manager.enrichPendingMoments()
+        XCTAssertEqual(manager.moments.first?.text, "After")
+        XCTAssertEqual(manager.moments.first?.analysis?.title, "After")
+    }
+}

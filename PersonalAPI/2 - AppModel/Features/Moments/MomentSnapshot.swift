@@ -40,10 +40,11 @@ struct MomentInput: Sendable {
 }
 
 enum MomentError: LocalizedError {
-    case emptyMoment, missingMoment
+    case emptyMoment, missingMoment, changedMoment
     var errorDescription: String? {
         switch self {
         case .emptyMoment: return "Write something before saving your Moment."
+        case .changedMoment: return "This entry changed while you were editing. Reopen it to see the latest version."
         case .missingMoment: return "The original Moment could not be found."
         }
     }

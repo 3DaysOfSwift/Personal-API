@@ -12,9 +12,10 @@ struct SettingsView: View {
                     if let error = viewModel.authenticationError { Text(error).foregroundStyle(theme.theme.error) }
                 }
                 Section("Your data") {
+                    NavigationLink("Manage journal entries") { JournalEntriesView() }
                     LabeledContent("Storage", value: "On this device")
                     LabeledContent("iCloud sync", value: "Not configured")
-                    Button("Export Personal API · JSON") {
+                    Button("Export your dataset · JSON") {
                         Task { exporting = await viewModel.prepareExport() }
                     }.disabled(viewModel.isWorking)
                     Text("Includes original Moments, profile facts, IDs, dates and derived metadata. Save a copy somewhere you control.").font(.footnote).foregroundStyle(theme.theme.secondary)
@@ -39,7 +40,7 @@ struct SettingsView: View {
                 if viewModel.isWorking { ProgressView() }
                 if let message = viewModel.message { Section { Text(message) } }
             }.scrollContentBackground(.hidden).background(theme.theme.background).navigationTitle("Settings")
-            .fileExporter(isPresented: $exporting, document: viewModel.document, contentType: .json, defaultFilename: "PersonalAPI") { result in
+            .fileExporter(isPresented: $exporting, document: viewModel.document, contentType: .json, defaultFilename: viewModel.filename) { result in
                 viewModel.exportFinished(result)
             }
         }

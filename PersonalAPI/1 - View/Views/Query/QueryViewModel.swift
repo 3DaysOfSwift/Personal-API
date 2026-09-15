@@ -18,7 +18,7 @@ import Observation
     func load() async {
         do {
             try await chats.load()
-            if !loaded, let latest = conversations.first { conversationID = latest.id }
+            // Load history without selecting it; each launch starts with a fresh draft.
             loaded = true; error = nil
         } catch { self.error = error.localizedDescription }
     }

@@ -34,7 +34,7 @@ Query uses the on-device Foundation Models language model where available to sel
 
 Face ID/device-passcode lock and inactive-screen concealment are included. This is an application access gate, not a separately encrypted vault. Exported JSON is plaintext and outside the app lock.
 
-No iCloud synchronization, import, HealthKit, attachments, semantic index, network service. Profile corrections, Moment deletion and portable archive import are subsequent work. Do not market this prototype as a sole lifetime archive; users can export now.
+No iCloud synchronization, import, HealthKit, attachments, semantic index, network service. Profile corrections and portable archive import are subsequent work. Settings supports journal entry editing and deletion; the user’s revised words become canonical, with derived metadata regenerated. Do not market this prototype as a sole lifetime archive; users can export now.
 
 ## Next acceptance milestones
 

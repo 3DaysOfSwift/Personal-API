@@ -89,3 +89,38 @@ extension LocalDataStoreTests {
         XCTAssertEqual(loaded, facts)
     }
 }
+
+extension LocalDataStoreTests {
+    func testEditAndDeletePersistAndInvalidateOnlyTheirDerivedFacts() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("journal.store")
+        let store = LocalDataStore(storeURL: url)
+        let source = MomentSnapshot(id: UUID(), text: "I love teaching.", createdAt: Date(timeIntervalSince1970: 123),
+            happenedAt: nil, source: "manual", analysisData: nil, processingState: "pending")
+        try await store.saveMoment(source)
+        let legacy = PersonalFactSnapshot(id: UUID(), label: "Keep", value: "Independent fact", createdAt: Date())
+        try await store.saveFact(legacy)
+        let extractor = LocalJournalFactExtractor(now: { Date() })
+        try await store.replaceDerivedFacts(extractor.extract(from: source), source: source)
+        _ = try await store.saveAnalysis(.init(title: "Old title", processor: "test", processedAt: Date()), momentID: source.id)
+        let updated = try await store.updateMoment(source, text: "I love making apps.")
+        XCTAssertEqual(updated.id, source.id)
+        XCTAssertEqual(updated.createdAt, source.createdAt)
+        XCTAssertNil(updated.analysisData)
+        XCTAssertEqual(updated.processingState, "pending")
+        let reopened = LocalDataStore(storeURL: url)
+        let records = try await reopened.loadMoments()
+        XCTAssertEqual(records, [updated])
+        let remainingFacts = try await reopened.loadFacts()
+        XCTAssertEqual(remainingFacts, [legacy])
+        do { _ = try await reopened.updateMoment(source, text: "Stale edit"); XCTFail("Expected conflict") } catch { XCTAssertEqual(error as? MomentError, .changedMoment) }
+        do { try await reopened.deleteMoment(source); XCTFail("Expected conflict") } catch { XCTAssertEqual(error as? MomentError, .changedMoment) }
+        try await reopened.replaceDerivedFacts(extractor.extract(from: updated), source: updated)
+        try await reopened.deleteMoment(updated)
+        let archive = try JSONDecoder().decode(PersonalArchive.self, from: await reopened.exportArchive())
+        XCTAssertTrue(archive.moments.isEmpty)
+        XCTAssertEqual(archive.facts, [legacy])
+    }
+}

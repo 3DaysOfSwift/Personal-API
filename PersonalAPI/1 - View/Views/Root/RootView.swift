@@ -13,6 +13,7 @@ struct RootView: View {
             else {
                 TabView(selection: $tab) {
                     TrainingView().tabItem { Label("Training", systemImage: "square.and.pencil") }.tag(1)
+                    LifeMapView().tabItem { Label("Life Map", systemImage: "sparkles") }.tag(5)
                     QueryView().tabItem {
                         Label {
                             Text("Personal API")
@@ -21,6 +22,7 @@ struct RootView: View {
                                 .renderingMode(.original)
                         }
                     }.tag(2)
+                    ExportView().tabItem { Label("Export", systemImage: "square.and.arrow.up") }.tag(4)
                     SettingsView().tabItem { Label("Settings", systemImage: "gearshape") }.tag(3)
                 }
             }
@@ -51,7 +53,7 @@ struct RootView: View {
 /// presentation margins so the fingerprint remains legible in the tab bar.
 private enum PersonalAPITabLogo {
     static let image: UIImage = {
-        guard let source = UIImage(named: "PersonalAPIBrand"), let cgImage = source.cgImage else {
+        guard let source = UIImage(named: "PersonalAPITab"), let cgImage = source.cgImage else {
             return UIImage()
         }
         let crop = CGRect(x: CGFloat(cgImage.width) * 0.20,
