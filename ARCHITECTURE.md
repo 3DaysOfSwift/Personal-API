@@ -72,9 +72,26 @@ A FIFO continuation gate in MomentsManager orders repository writes/reads with p
 
 ## Retrieval and search lifetime
 
-QueryManager reads authoritative sources through the repository. MomentRetriever ranks original text by unique keyword overlap, with capture-time ties and a 20-result limit. This work runs on an actor. Derived metadata is never substituted for evidence. The semantic result distinguishes matches from no evidence; the ViewModel supplies display wording.
+QueryManager reads authoritative original Moments through the repository. Its injected
+OnDeviceMomentSearch actor uses Foundation Models on iOS 26+/macOS 26+ when the local
+Apple Intelligence model is available. Each fresh model session selects relevant
+passage indices from JSON input; only validated repository IDs become evidence.
+Entries are split into overlapping 1,200-character passages in batches of three,
+so long entries are not silently truncated. Results are deduplicated and ordered
+by capture date, capped at 20 original Moments. This is a small-dataset semantic
+search prototype, not an embedding index or a generated-answer system.
 
-QueryViewModel owns its replaceable search task, cancels superseded searches and uses request identity to prevent an older response from publishing. Leaving the screen cancels the search and invalidates its result. Repository failures are errors, not false no-evidence answers. Query still excludes profile facts and performs no semantic reasoning.
+The model treats question/entry text as untrusted data. Prompt instructions alone
+cannot prove relevance; source inspection remains essential. Invalid IDs, unavailable
+models and generation failures fall back to keyword overlap with explicit status.
+Cancellation propagates instead of starting fallback. A valid empty AI selection
+remains empty. Every search uses a fresh repository snapshot and writes nothing.
+
+QueryViewModel owns the replaceable task and request identity, preventing late
+results from replacing a newer search. The UI reports AI versus keyword search and
+lets users open exact source text. Questions are limited to 500 characters. Profile
+facts, relative-date resolution, cross-entry reasoning and generated answers are
+outside this first search slice. Runtime model availability is checked each search.
 
 ## Authentication
 

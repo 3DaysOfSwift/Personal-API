@@ -10,7 +10,7 @@ struct QueryView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Text("BABY API · QUERY LAB").font(.caption).tracking(2).foregroundStyle(theme.theme.secondary)
                     Text("Ask about your life.").font(.largeTitle.bold())
-                    Text("Search your Moments using words you remember. This prototype finds exact keywords; it doesn’t reason about your life yet.").foregroundStyle(theme.theme.secondary)
+                    Text("Ask in your own words. On-device AI looks for relevant Moments by meaning. If it’s unavailable, we’ll show keyword results instead.").foregroundStyle(theme.theme.secondary)
                     HStack {
                         TextField("Try an idea, a person, a place…", text: $viewModel.question, axis: .vertical).submitLabel(.search).onSubmit { viewModel.submitSearch() }
                         Button { viewModel.submitSearch() } label: { Image(systemName: "arrow.up.circle.fill").font(.title) }.accessibilityLabel("Search Moments").disabled(!viewModel.canSearch)
@@ -19,6 +19,7 @@ struct QueryView: View {
                     if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
                     if viewModel.searched {
                         Text(viewModel.submitted).font(.headline)
+                        Text(viewModel.searchMethod).font(.caption).foregroundStyle(theme.theme.secondary)
                         Text(viewModel.answer)
                         if !viewModel.results.isEmpty {
                             DisclosureGroup("Based on \(viewModel.results.count) Moments") {
@@ -39,7 +40,7 @@ struct QueryView: View {
                             if let feedback = viewModel.feedback { Text("This session: \(feedback)").font(.caption).foregroundStyle(theme.theme.secondary) }
                         }
                         #if DEBUG
-                        Text("Diagnostics: \(viewModel.results.count) / \(viewModel.searchedCount) retrieved · keyword overlap · limit 20 · no generated answer · profile facts excluded").font(.caption).foregroundStyle(theme.theme.secondary)
+                        Text("Diagnostics: \(viewModel.results.count) / \(viewModel.searchedCount) retrieved · limit 20 · original sources · profile facts excluded").font(.caption).foregroundStyle(theme.theme.secondary)
                         #endif
                     }
                 }.padding(24)

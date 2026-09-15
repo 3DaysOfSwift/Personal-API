@@ -1,3 +1,27 @@
+# Local AI search — 15 September 2026
+
+- 28 deterministic tests pass. The suite now also contains one opt-in real-model
+  evaluation, skipped unless PERSONAL_API_LIVE_AI_TEST=1.
+- iPhone Simulator app and test targets build with Xcode 26.2, arm64/x86_64.
+  The command-line build uses OTHER_SWIFT_FLAGS=-disable-sandbox to allow compiler
+  macro subprocesses in this environment; this is not a project setting.
+- Coverage includes injected semantic selection without keyword overlap, unchanged
+  source records, unavailable-model fallback, rejection of invented IDs, cancellation,
+  AI abstention, full-text chunking and existing stale-result suppression.
+- The actual Mac model reports available, but an attempted synthetic real-model
+  query failed with Apple inference service “Sandbox restriction” (lookup error 159).
+  This is recorded as an unverified live path, not a passing AI quality test.
+- CoreSimulator service access is blocked from this session. The updated app was
+  not installed or run against the user’s iPhone Air journal database. No simulator
+  was erased, no app was uninstalled, and the persistence schema/bundle ID are unchanged.
+
+Run the app from Xcode and confirm “On-device AI” after a search. Check paraphrases,
+unrelated questions, long entries and repeated searches against known journal facts.
+Open each source to assess false matches and omissions. Use the opt-in synthetic
+model test outside the restricted environment for a repeatable initial quality check.
+
+## Earlier prototype evidence
+
 # Validation — 15 September 2026, after AppModel refactor
 
 ## Executed successfully

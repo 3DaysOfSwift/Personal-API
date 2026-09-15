@@ -22,8 +22,22 @@ Read [PRODUCT.md](PRODUCT.md) for scope and principles, and [ARCHITECTURE.md](AR
 
 Use Product → Test. 22 tests cover the screen ViewModels, feature failures and concurrency, raw-source/export preservation, and SwiftData persistence. You can also run `swift test` on macOS to execute the same shared Model/ViewModel tests without Simulator. See VALIDATION.md for checks actually completed in this environment.
 
-The first processor extracts titles only. Foundation Models, iCloud sync, import, HealthKit and semantic/generative queries are intentionally deferred.
+The first processor extracts titles only. Query now uses on-device Foundation Models for semantic search when available (iOS 26+ and Apple Intelligence); other configurations show explicit keyword fallback. Every result opens the original entry. Generated answers, iCloud sync, import and HealthKit remain deferred.
 
 ## Architecture reference
 
 This project now uses Matthew’s numbered AppModel structure from the confirmed Trend repository. Read [AGENTS.md](AGENTS.md), the [canonical template](Documentation/APPMODEL_IOS_APPLICATION_TEMPLATE.md), and the [architecture review](Documentation/ARCHITECTURE_REVIEW.md) before changing the design.
+
+## Try local AI search
+
+Run the existing PersonalAPI scheme on your iPhone Air simulator with ⌘R; do not
+uninstall the app or erase its simulator. The bundle identifier and SwiftData schema
+are unchanged, so this update uses the same saved journal entries.
+
+Open Query and ask about a topic in your entries using different wording. After
+search, check the method label: “On-device AI” confirms semantic retrieval;
+“Keyword search” explains why the model was unavailable or failed. Open the returned
+Moments to judge relevance. Apple Intelligence availability depends on the runtime
+and device; the simulator’s model availability is not assumed from the Mac’s.
+
+[Apple Foundation Models overview](https://developer.apple.com/videos/play/wwdc2025/286/)

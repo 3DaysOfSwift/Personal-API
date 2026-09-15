@@ -21,7 +21,7 @@ A private lifetime dataset, built one Moment at a time. Training stays useful fo
 2. Add labelled profile facts, or log a Moment with an optional user-provided event date.
 3. Commit original text to local SwiftData storage immediately.
 4. Produce an extractive title through the interchangeable Moment Processor boundary.
-5. Query original Moments by keywords; inspect every matching source.
+5. Query original Moments by meaning with on-device AI, or explicit keyword fallback; inspect every matching source.
 6. Export the complete current dataset as versioned JSON.
 
 Four tabs: Profile, Training (initial tab), Query, Settings. Dark mode only, content first, restrained typography and controls. Query is available from the first entry so ingestion/retrieval can be evaluated immediately.
@@ -30,7 +30,7 @@ Four tabs: Profile, Training (initial tab), Query, Settings. Dark mode only, con
 
 The current processor is deterministic and only extracts a title. The schema has space for factual tags, categories, themes, emotions, significance, life-event classification and evidence-supported event-date extraction. Foundation Models enrichment is not implemented yet.
 
-Query is exact keyword overlap, capped at 20 results. It does not understand dates, synonyms, negation or natural-language reasoning. It searches Moments only; profile facts are stored and exported but not retrieved yet. Feedback is session-local.
+Query uses the on-device Foundation Models language model where available to select relevant original Moments by meaning, capped at 20 results. Model selection can be wrong; it produces no factual narrative. Availability or generation failure uses explicitly labelled keyword overlap. Relative-date resolution and cross-entry reasoning are not implemented. It searches Moments only; profile facts are stored and exported but not retrieved yet. Feedback is session-local.
 
 Face ID/device-passcode lock and inactive-screen concealment are included. This is an application access gate, not a separately encrypted vault. Exported JSON is plaintext and outside the app lock.
 

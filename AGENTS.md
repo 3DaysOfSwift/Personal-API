@@ -4,7 +4,11 @@ Use Matthew’s AppModel architecture. Read Documentation/APPMODEL_IOS_APPLICATI
 
 Canonical reference confirmed by Matthew: /Users/matthewthomas/Documents/Codex/2026-09-03/i-x20/outputs/Trend
 
-Read that repository’s Skills/swift-concurrency-migration/SKILL.md for architecture work. Its Skills/xcode-project-dashboard/SKILL.md and bundled swift-architecture-analyser-tool provide the read-only evaluation workflow when a dashboard is requested. Do not infer scores from folder names or a successful build.
+Reusable skills now live in ../cooperative-feature-architecture/skills. For feature
+work, use cfa-architecture-adoption without expanding scope to whole-app adoption.
+The former Trend skill folders have been extracted. cfa-architecture-review provides
+the read-only review workflow when requested. Do not infer scores from folder names
+or a successful build.
 
 Preserve numbered Xcode groups, one adjacent ViewModel per screen, narrow feature APIs, AppModel.live() composition, repository-owned SwiftData and injectable dependencies. No business rules or persistence in Views/ViewModels. Preserve canonical original text and the PRODUCT.md principles.
 
