@@ -153,3 +153,11 @@ can still replace and cancel the previous request. Answer instructions prioritis
 recorded relationship and relevant facts, attribute uncertainty and avoid endorsing
 character judgments or predicting someone’s future. These are safeguards to evaluate,
 not proof that model refusals or inaccurate answers have been eliminated.
+
+## Personal response voice
+
+Answer instructions address the journal owner directly as you/your, mapping first-person
+memories to a second-person response. Relationship-first answers use recorded details
+only. Perceptions remain attributed and time-bounded; the prompt must not infer "always",
+locations or stronger claims than the source supports. A fictional example teaches voice
+without importing the user’s private memories into the application’s prompt template.
