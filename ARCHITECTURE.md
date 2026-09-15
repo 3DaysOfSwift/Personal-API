@@ -138,5 +138,5 @@ behind a collapsed Sources control. Journal text is never replaced by a response
 The context budget remains 6,000 characters, at most 2,000 per Moment. Omitted
 context is disclosed. Model refusals, context overflow, unavailable assets, language
 limitations and service errors are presented as answer failures, never as successful
-match-count responses. The composer sits at the bottom with the response above it.
+match-count responses. The composer sits beneath the introduction with the response below it.
 This is still a single-question interface, not persistent multi-turn conversation.

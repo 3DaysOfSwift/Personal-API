@@ -13,6 +13,13 @@ struct QueryView: View {
                         Text("A conversation grounded in your memories.")
                             .foregroundStyle(theme.theme.secondary)
                     }
+                HStack {
+                    TextField("Ask about your life…", text: $viewModel.question, axis: .vertical)
+                        .lineLimit(1...5).submitLabel(.send).onSubmit { viewModel.submitSearch() }
+                    Button { viewModel.submitSearch() } label: {
+                        Image(systemName: "arrow.up.circle.fill").font(.title)
+                    }.accessibilityLabel("Ask Personal API").disabled(!viewModel.canSearch)
+                }.padding(16).background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
                     if viewModel.isSearching || viewModel.searched {
                         HStack {
                             Spacer(minLength: 32)
@@ -55,16 +62,6 @@ struct QueryView: View {
                         }
                     }
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .safeAreaInset(edge: .bottom) {
-                HStack {
-                    TextField("Ask about your life…", text: $viewModel.question, axis: .vertical)
-                        .lineLimit(1...5).submitLabel(.send).onSubmit { viewModel.submitSearch() }
-                    Button { viewModel.submitSearch() } label: {
-                        Image(systemName: "arrow.up.circle.fill").font(.title)
-                    }.accessibilityLabel("Ask Personal API").disabled(!viewModel.canSearch)
-                }.padding(16).background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
-                    .padding(.horizontal, 20).padding(.vertical, 8)
             }
             .navigationTitle("Query").navigationBarTitleDisplayMode(.inline)
             .onDisappear { viewModel.cancelSearch() }
