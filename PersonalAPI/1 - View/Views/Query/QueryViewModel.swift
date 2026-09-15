@@ -20,6 +20,7 @@ import Observation
     init(query: any QueryFeature = AppModel.shared.queryFeature) { self.query = query }
     var canSearch: Bool { query.canSearch(question) }
     func submitSearch() {
+        guard !(isSearching && question == submitted) else { return }
         searchTask?.cancel()
         searchTask = Task { await search() }
     }

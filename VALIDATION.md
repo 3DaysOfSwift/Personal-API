@@ -1,3 +1,17 @@
+# Reliability update — 15 September 2026
+
+- The user supplied evidence of a model refusal followed by a successful generated
+  answer after manual retry on the simulator. The full on-device path is demonstrated.
+- Added greedy sampling, one bounded retry for temporary service failures and a
+  duplicate-submission guard. No automatic retry of refusals or guardrail responses.
+- 39 deterministic tests pass; one opt-in live-model test is skipped. New checks
+  cover retry recovery, retry exhaustion, permanent errors, cancellation during
+  backoff and refusal/guardrail classification. iPhone app and test targets build.
+- Whether this reduces refusal frequency needs repeated simulator trials. Greedy
+  sampling does not guarantee determinism of the entire service or safety checks.
+
+## Previous evidence
+
 # Conversational response correction — 15 September 2026
 
 The user demonstrated answer failure on the simulator after successful retrieval.

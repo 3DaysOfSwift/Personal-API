@@ -140,3 +140,16 @@ context is disclosed. Model refusals, context overflow, unavailable assets, lang
 limitations and service errors are presented as answer failures, never as successful
 match-count responses. The composer sits beneath the introduction with the response below it.
 This is still a single-question interface, not persistent multi-turn conversation.
+
+## Local model reliability
+
+Both selection and prose generation use greedy sampling to reduce sampling variation.
+A fresh model session retries once after a cancellable 750 ms delay only for explicit
+rate limiting/concurrent-request errors or Cocoa XPC interruption/invalidation.
+Refusals, guardrail responses, missing assets, unsupported language and context errors
+are not automatically retried. The retry helper inherits its caller’s actor isolation.
+Identical submissions while the current query is running are ignored; a changed query
+can still replace and cancel the previous request. Answer instructions prioritise the
+recorded relationship and relevant facts, attribute uncertainty and avoid endorsing
+character judgments or predicting someone’s future. These are safeguards to evaluate,
+not proof that model refusals or inaccurate answers have been eliminated.

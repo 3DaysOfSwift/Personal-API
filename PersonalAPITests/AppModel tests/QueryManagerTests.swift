@@ -1,4 +1,7 @@
 import XCTest
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 @testable import PersonalAPI
 
 private struct SearchStub: SemanticMomentSearching {
@@ -21,6 +24,57 @@ private struct AnswerStub: MomentAnswering {
     private func moment(_ text: String) -> MomentSnapshot {
         MomentSnapshot(id: UUID(), text: text, createdAt: Date(), happenedAt: nil,
                        source: "journal", analysisData: nil, processingState: "pending")
+    }
+    func testModelRefusalsAndGuardrailsAreNotRetried() throws {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, macOS 26.0, *) {
+            let context = LanguageModelSession.GenerationError.Context(debugDescription: "test")
+            XCTAssertFalse(isTemporaryModelFailure(LanguageModelSession.GenerationError.guardrailViolation(context)))
+            XCTAssertFalse(isTemporaryModelFailure(LanguageModelSession.GenerationError.refusal(.init(transcriptEntries: []), context)))
+            XCTAssertTrue(isTemporaryModelFailure(LanguageModelSession.GenerationError.rateLimited(context)))
+        }
+        #endif
+    }
+    func testTemporaryFailureRetriesOnceAndReturnsAnswer() async throws {
+        var calls = 0
+        let result: String = try await withLocalModelRetry(pause: {}) {
+            calls += 1
+            if calls == 1 { throw NSError(domain: NSCocoaErrorDomain, code: 4097) }
+            return "Recovered answer"
+        }
+        XCTAssertEqual(calls, 2)
+        XCTAssertEqual(result, "Recovered answer")
+    }
+    func testRetryStopsAfterSecondTemporaryFailure() async {
+        var calls = 0
+        do {
+            let _: String = try await withLocalModelRetry(pause: {}) {
+                calls += 1
+                throw NSError(domain: NSCocoaErrorDomain, code: 4099)
+            }
+            XCTFail("Expected failure")
+        } catch { XCTAssertEqual(calls, 2) }
+    }
+    func testPermanentFailureIsNotRetried() async {
+        var calls = 0
+        do {
+            let _: String = try await withLocalModelRetry(pause: {}) {
+                calls += 1
+                throw QueryFailure.unavailable("Not eligible")
+            }
+            XCTFail("Expected failure")
+        } catch { XCTAssertEqual(calls, 1) }
+    }
+    func testCancellationDuringBackoffPreventsSecondAttempt() async {
+        var calls = 0
+        do {
+            let _: String = try await withLocalModelRetry(pause: { throw CancellationError() }) {
+                calls += 1
+                throw NSError(domain: NSCocoaErrorDomain, code: 4097)
+            }
+            XCTFail("Expected cancellation")
+        } catch is CancellationError { XCTAssertEqual(calls, 1) }
+        catch { XCTFail("Expected cancellation, got \(error)") }
     }
     func testConversationalAnswerDoesNotRequireGeneratedQuotations() async throws {
         let source = moment("Alex is my school friend.")
