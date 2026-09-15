@@ -1,3 +1,17 @@
+# Grounded answers — 15 September 2026
+
+- 32 deterministic tests pass; one opt-in live-model test is skipped by default.
+- iPhone app and test targets: TEST BUILD SUCCEEDED, Xcode 26.2.
+- Added checks for supported-answer delivery, fabricated-quote rejection with retained
+  evidence, abstention and ViewModel presentation of actual generated text.
+- The user’s screenshot confirms semantic retrieval ran on their simulator. This
+  does not establish answer-generation quality, which still needs a live simulator
+  check outside this session’s inference-service restriction.
+- No journal database, schema or bundle identifier changes. No simulator reinstall
+  or erase was performed. Run the updated app from Xcode to test the answer stage.
+
+## Previous search implementation evidence
+
 # Local AI search — 15 September 2026
 
 - 28 deterministic tests pass. The suite now also contains one opt-in real-model

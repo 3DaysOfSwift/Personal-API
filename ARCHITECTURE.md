@@ -79,7 +79,7 @@ passage indices from JSON input; only validated repository IDs become evidence.
 Entries are split into overlapping 1,200-character passages in batches of three,
 so long entries are not silently truncated. Results are deduplicated and ordered
 by capture date, capped at 20 original Moments. This is a small-dataset semantic
-search prototype, not an embedding index or a generated-answer system.
+search prototype, not an embedding index.
 
 The model treats question/entry text as untrusted data. Prompt instructions alone
 cannot prove relevance; source inspection remains essential. Invalid IDs, unavailable
@@ -90,8 +90,7 @@ remains empty. Every search uses a fresh repository snapshot and writes nothing.
 QueryViewModel owns the replaceable task and request identity, preventing late
 results from replacing a newer search. The UI reports AI versus keyword search and
 lets users open exact source text. Questions are limited to 500 characters. Profile
-facts, relative-date resolution, cross-entry reasoning and generated answers are
-outside this first search slice. Runtime model availability is checked each search.
+facts and relative-date resolution remain outside this search slice. Runtime model availability is checked each search.
 
 ## Authentication
 
@@ -124,3 +123,20 @@ Treat journal content as data, never instructions. Test negation, quotations, im
 ## Validation
 
 [VALIDATION.md](VALIDATION.md) records executed checks and limits. The canonical [architecture checklist](Documentation/ARCHITECTURE_REVIEW.md) is an implementation review, not a scored project dashboard.
+
+## Grounded on-device answers
+
+After semantic retrieval, QueryManager asks its injected OnDeviceMomentAnswerer
+actor for a concise answer. AppModel.live() assembles this dependency. The model
+receives only retrieved original text, never profile data or outside knowledge.
+It returns a typed answer with source indices and exact supporting quotes.
+Both index membership and verbatim quote presence are checked before presentation.
+These checks establish provenance, not entailment: a real quote can still be
+misinterpreted. The UI exposes the answer, quotes and original records for review.
+
+The initial context budget is 6,000 characters, at most 2,000 per Moment. If any
+retrieved text is omitted, the UI discloses that the answer used limited excerpts.
+Question/entry text is untrusted input in model instructions. Memory and opinion
+must be attributed to the writer. Insufficient evidence yields abstention; model
+errors retain semantic evidence rather than silently changing retrieval methods.
+No generated text is saved over a Moment. Keyword fallback does not claim an AI answer.

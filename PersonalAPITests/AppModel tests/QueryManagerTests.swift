@@ -12,10 +12,45 @@ private struct SearchStub: SemanticMomentSearching {
     }
 }
 
+private struct AnswerStub: MomentAnswering {
+    let result: GroundedAnswer?
+    func answer(question: String, evidence: [Evidence]) async throws -> GroundedAnswer? { result }
+}
+
 @MainActor final class QueryManagerTests: XCTestCase {
     private func moment(_ text: String) -> MomentSnapshot {
         MomentSnapshot(id: UUID(), text: text, createdAt: Date(), happenedAt: nil,
                        source: "journal", analysisData: nil, processingState: "pending")
+    }
+    func testSupportedAnswerIsReturnedWithOriginalEvidence() async throws {
+        let source = moment("Alex is my school friend.")
+        let repository = MemoryRepository(); try await repository.saveMoment(source)
+        let answer = GroundedAnswer(text: "Alex is your school friend.", citations: [AnswerCitation(momentID: source.id, quote: source.text)])
+        let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: SearchStub(ids: [source.id]), answerer: AnswerStub(result: answer))
+        let result = try await manager.search("Who is Alex?")
+        XCTAssertEqual(result.generatedAnswer?.text, answer.text)
+        XCTAssertEqual(result.evidence.first?.moment, source)
+        XCTAssertNil(result.answerIssue)
+    }
+    func testInventedQuoteRejectsAnswerButRetainsRetrievedMoments() async throws {
+        let source = moment("Alex is my school friend.")
+        let repository = MemoryRepository(); try await repository.saveMoment(source)
+        let answer = GroundedAnswer(text: "Alex is your brother.", citations: [AnswerCitation(momentID: source.id, quote: "Alex is my brother")])
+        let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: SearchStub(ids: [source.id]), answerer: AnswerStub(result: answer))
+        let result = try await manager.search("Who is Alex?")
+        XCTAssertNil(result.generatedAnswer)
+        XCTAssertNotNil(result.answerIssue)
+        XCTAssertEqual(result.method, .onDeviceAI)
+        XCTAssertEqual(result.evidence.first?.id, source.id)
+    }
+    func testAnswerAbstentionRetainsSourcesAndExplainsInsufficientEvidence() async throws {
+        let source = moment("I saw Alex.")
+        let repository = MemoryRepository(); try await repository.saveMoment(source)
+        let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: SearchStub(ids: [source.id]), answerer: AnswerStub(result: nil))
+        let result = try await manager.search("Where does Alex live?")
+        XCTAssertNil(result.generatedAnswer)
+        XCTAssertNotNil(result.answerIssue)
+        XCTAssertEqual(result.evidence.count, 1)
     }
     func testOnDeviceModelWithSyntheticJournalWhenRequested() async throws {
         guard ProcessInfo.processInfo.environment["PERSONAL_API_LIVE_AI_TEST"] == "1" else {

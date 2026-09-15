@@ -9,6 +9,9 @@ import Observation
     private(set) var isSearching = false
     private(set) var error: String?
     private(set) var answer = ""
+    private(set) var hasAIAnswer = false
+    private(set) var answerNote: String?
+    private(set) var citations: [AnswerCitation] = []
     private(set) var searchMethod = ""
     var feedback: String?
     private let query: any QueryFeature
@@ -27,7 +30,7 @@ import Observation
     func search() async {
         let id = UUID(); requestID = id
         submitted = question; feedback = nil; error = nil
-        results = []; answer = ""; searchMethod = ""; searched = false; isSearching = true
+        results = []; answer = ""; hasAIAnswer = false; answerNote = nil; citations = []; searchMethod = ""; searched = false; isSearching = true
         defer { if requestID == id { isSearching = false } }
         do {
             let result = try await query.search(submitted)
@@ -39,9 +42,18 @@ import Observation
             case .keywords(let reason):
                 searchMethod = "Keyword search" + (reason.map { " · " + $0 } ?? "")
             }
+            if let generated = result.generatedAnswer {
+                answer = generated.text
+                hasAIAnswer = true
+                citations = generated.citations
+                searchMethod = "On-device AI · answered from your Moments"
+                answerNote = generated.contextLimited ? "This answer used excerpts from the retrieved Moments. Some text was outside the answer context; inspect the originals for more detail." : nil
+            } else {
+            answerNote = result.answerIssue
             switch result.outcome {
             case .noEvidence: answer = "I don’t know enough about you yet. This search found no matching Moments. Try rephrasing your question."
             case .matches: answer = "I found \(results.count) matching Moments. Read the original words below to judge whether they answer your question."
+            }
             }
         } catch is CancellationError { }
         catch { if requestID == id { self.error = error.localizedDescription } }

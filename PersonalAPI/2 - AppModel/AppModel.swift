@@ -22,7 +22,7 @@ import Foundation
         let moments = MomentsManager(repository: repository, processor: LocalMomentProcessor(now: now), now: now)
         let profile = ProfileManager(repository: repository, now: now)
         return AppModel(moments: moments, profile: profile,
-                        query: QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: OnDeviceMomentSearch()),
+                        query: QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: OnDeviceMomentSearch(), answerer: OnDeviceMomentAnswerer()),
                         authentication: AuthenticationManager(client: LocalDeviceAuthentication(), preferences: preferences),
                         settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile))
     }

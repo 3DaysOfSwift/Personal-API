@@ -8,6 +8,17 @@ import XCTest
     }
 }
 @MainActor final class QueryViewModelTests: XCTestCase {
+    func testGeneratedAnswerIsDisplayedInsteadOfMatchCountMessage() async {
+        let query = DeferredQuery(); let vm = QueryViewModel(query: query)
+        vm.question = "Who is Alex?"
+        let task = Task { await vm.search() }
+        while query.pending[vm.question] == nil { await Task.yield() }
+        let generated = GroundedAnswer(text: "Alex is your school friend.", citations: [])
+        query.pending.removeValue(forKey: vm.question)?.resume(returning: QueryResult(evidence: [], searchedCount: 1, generatedAnswer: generated, method: .onDeviceAI))
+        await task.value
+        XCTAssertEqual(vm.answer, generated.text)
+        XCTAssertTrue(vm.hasAIAnswer)
+    }
     func testKeywordEvidenceAndAbstention() async throws {
         let graph = TestAppModelFactory()
         try await graph.app.momentsFeature.recordMoment(text: "garden idea", happenedAt: nil)
