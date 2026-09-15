@@ -1,0 +1,13 @@
+import XCTest
+@testable import PersonalAPI
+@MainActor final class MomentDetailViewModelTests: XCTestCase {
+    func testDetailReflectsLaterEnrichment() async throws {
+        let graph = TestAppModelFactory()
+        try await graph.app.momentsFeature.recordMoment(text: "Remember this", happenedAt: nil)
+        let source = try XCTUnwrap(graph.app.momentsFeature.moments.first)
+        let vm = MomentDetailViewModel(moments: graph.app.momentsFeature)
+        await graph.app.momentsFeature.enrichPendingMoments()
+        XCTAssertEqual(vm.current(source).processingState, "complete")
+        XCTAssertEqual(vm.current(source).text, source.text)
+    }
+}
