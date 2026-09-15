@@ -2,8 +2,6 @@ import Foundation
 import Observation
 @MainActor @Observable final class TrainingViewModel {
     var text = ""
-    var hasEventDate = false
-    var eventDate = Date()
     private(set) var error: String?
     private(set) var didSave = false
     private(set) var isSaving = false
@@ -21,8 +19,8 @@ import Observation
         didSave = false
         isSaving = true; defer { isSaving = false }
         do {
-            try await momentsFeature.recordMoment(text: text, happenedAt: hasEventDate ? eventDate : nil)
-            text = ""; hasEventDate = false; error = nil; didSave = true
+            try await momentsFeature.recordMoment(text: text, happenedAt: nil)
+            text = ""; error = nil; didSave = true
         } catch { self.error = "Your draft is still here. \(error.localizedDescription)" }
     }
 }

@@ -14,6 +14,8 @@ struct QueryResult: Codable, Sendable {
     var generatedAnswer: GroundedAnswer? = nil
     var answerIssue: String? = nil
     var method: SearchMethod = .keywords(reason: nil)
+    var failureStage: QueryFailureStage? = nil
+    var candidatePassageCount: Int? = nil
 }
 @MainActor protocol QueryFeature: AnyObject, Sendable {
     func canSearch(_ question: String) -> Bool
@@ -44,3 +46,5 @@ extension QueryFeature {
         try await search(question)
     }
 }
+
+enum QueryFailureStage: String, Codable, Sendable { case retrieval, answerGeneration }

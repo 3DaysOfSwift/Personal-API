@@ -7,6 +7,7 @@ protocol PersonalDataRepository: Sendable {
     func markAnalysesPending() async throws -> [MomentSnapshot]
     func loadFacts() async throws -> [PersonalFactSnapshot]
     func saveFact(_ fact: PersonalFactSnapshot) async throws
+    func replaceDerivedFacts(_ facts: [PersonalFactSnapshot], source: MomentSnapshot) async throws
     func exportArchive() async throws -> Data
 }
 

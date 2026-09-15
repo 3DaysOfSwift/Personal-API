@@ -20,6 +20,7 @@ import SwiftData
     var label: String = ""
     var value: String = ""
     var createdAt: Date = Date()
+    var derivationData: Data?
     init(label: String, value: String) { self.label = label; self.value = value }
 }
 

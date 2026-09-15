@@ -12,3 +12,7 @@ Run PersonalAPI from Xcode on the existing iPhone Air simulator with ⌘R. Do no
 8. Check the raised composer with the keyboard shown/hidden, larger text sizes, and the top-right tab toggle.
 
 Automated checks cover persistence, failure retention, cancellation, question-only context, context bounds, fresh evidence on retry, and journal preservation on chat deletion. Live model relevance, inference quality and this iPhone UI flow still require manual verification.
+
+## Candidate selection check
+
+After rebuilding, use New chat and ask “What is my job?” with a work-related journal entry saved. Then ask a school question. Check Sources: each should concern the requested topic. Ask a reference-based follow-up, then change topic explicitly. A question without locally matching passages should ask for more specific wording without calling the AI. The index is lexical; unfamiliar paraphrases may need more explicit terms.

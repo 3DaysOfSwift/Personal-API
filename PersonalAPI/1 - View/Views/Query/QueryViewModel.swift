@@ -79,6 +79,15 @@ import Observation
         do { return try await chats.export() }
         catch { self.error = error.localizedDescription; return nil }
     }
+    func failureDetails(for turn: ChatTurn) -> String? {
+        switch turn.result?.failureStage {
+        case .retrieval:
+            return "AI search stopped before an answer could be generated. Any sources shown were found by keyword search."
+        case .answerGeneration:
+            return "AI search found relevant passages, but the model stopped while generating the answer."
+        case nil: return nil
+        }
+    }
     func answer(for turn: ChatTurn) -> String {
         if let failure = turn.failure { return failure }
         guard let result = turn.result else { return "This answer was interrupted. Tap Answer again to continue." }
@@ -86,7 +95,7 @@ import Observation
         if let issue = result.answerIssue { return issue }
         switch result.method {
         case .keywords(let reason): return reason ?? "On-device answering is unavailable for this question."
-        case .onDeviceAI: return "I don’t have enough information in your recorded memories to answer that yet."
+        case .onDeviceAI: return "I don’t have enough information in your recorded moments to answer that yet."
         }
     }
 }

@@ -19,8 +19,9 @@ import SwiftUI
                 else { Color.clear }
             }
             .environment(theme)
+            .buttonStyle(PersonalAPIButtonStyle())
             .preferredColorScheme(.dark)
-            .tint(theme.theme.accent)
+            .tint(theme.theme.interactiveAccent)
             .foregroundStyle(theme.theme.primary)
         }
     }

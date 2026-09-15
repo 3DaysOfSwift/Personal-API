@@ -89,8 +89,7 @@ remains empty. Every search uses a fresh repository snapshot and writes nothing.
 
 QueryViewModel owns the replaceable task and request identity, preventing late
 results from replacing a newer search. The UI reports AI versus keyword search and
-lets users open exact source text. Questions are limited to 500 characters. Profile
-facts and relative-date resolution remain outside this search slice. Runtime model availability is checked each search.
+lets users open exact source text. Questions are limited to 500 characters. Journal Moments remain answer evidence; source-linked extracted facts expand local retrieval; relative-date resolution remains outside this search slice. Runtime model availability is checked each search.
 
 ## Authentication
 
@@ -185,3 +184,56 @@ UI state (selected conversation, composer, sheets, keyboard and cancellable task
 Semantic retrieval now returns the selected original passages as well as Moment identity. QueryManager verifies each passage is a nonempty exact substring of its source before forwarding it. AnswerContext passes these excerpts to generation instead of replacing them with the first 2,000 characters of each record. The 6,000-character budget keeps whole passages; omitted context remains disclosed.
 
 Answer instructions permit partial and qualified answers from mixed or uncertain recollections. They preserve negation and distinguish present-day judgments from feelings at the time. No personal example or question-specific answer is embedded. Refusals remain reported and are not automatically retried. This improves evidence delivery but cannot guarantee model compliance or factual accuracy. Optional passage metadata remains compatible with older saved chats.
+
+## Local candidate selection before AI
+
+AppModel.live() now injects a LocalQueryIndex actor into QueryManager. Each query reads the canonical repository snapshot; the actor refreshes changed entries and removes deleted entries from its regenerable in-memory cache. It indexes exact 600-character passages with 100-character overlap, outside the Main Actor. This is a lexical candidate index with a small explicit synonym vocabulary, not an embedding index or a persisted AI summary database.
+
+The current question ranks candidates across the local collection before any model call. At most 12 passages are sent to semantic selection, with at most three per entry (one per entry for broad timeline wording). Matched topic vocabulary narrows candidates; childhood is not excluded by a fixed rule. A passage relevant to both work and childhood can legitimately appear in a work search.
+
+Only reference-bearing follow-ups inherit recent questions. A standalone topic change does not resend old questions. This heuristic can miss implicit follow-ups and is not a general conversation resolver.
+
+No local candidates means no AI request and a message suggesting a more specific person, place or topic. The app never silently falls back to sending the whole journal. Semantic output must reference text from the supplied candidates; answers still use original, validated passages. No original source or SwiftData schema is changed.
+
+Known limits: English vocabulary, lexical recall, character-based passage boundaries, capped coverage for broad questions, full repository snapshot reads and an index rebuilt after relaunch. Persistent indexing and richer enrichment remain future work. This change reduces irrelevant input; it does not bypass model guardrails or guarantee successful answers.
+
+
+## Journal-only Training and automatic fact indexing
+
+Training has no Facts input. MomentsManager now owns automatic extraction after the
+original journal save, independently of title enrichment. LocalJournalFactExtractor
+runs off the main actor and extracts explicit English statements as qualified original
+paragraphs. Labels are search hints, not verified personal attributes or model output.
+No dates, current status, or confidence scores are inferred. Opposing entries stay
+separate and retain their original timestamps and text.
+
+PersonalFactSnapshot has optional FactDerivation (source UUID, original source revision,
+extractor version). PersonalFact adds one optional derivationData property for additive
+SwiftData migration. Legacy rows decode without derivation and remain in export, but
+cannot enter new searches. LocalDataStore atomically replaces an entry's derived rows,
+validates its current source revision, and keeps unchanged extractions stable. Journal
+text is never rewritten. The existing export envelope is retained with optional fact
+metadata. No new UI or separate manager was introduced.
+
+Completed older Moments are backfilled on load; new saves enqueue extraction. Retry
+and Regenerate Metadata retry indexing. Extraction failure leaves the saved entry
+usable and publishes an enrichment error. This is foreground app work, not a scheduled
+background job. The cheap local extraction pass is rechecked after app relaunch.
+
+LocalQueryIndex checks source UUID, full text revision, extractor version and exact
+support before ranking a derived passage. Missing or changed sources are ineligible
+immediately. Only original journal text reaches the AI, with original journal IDs for
+citations. Existing bounds (12 candidates, 3 per entry) apply, and duplicate passages
+are removed. Legacy archived fact citations remain readable.
+
+Limits: this first extractor recognises a small set of English first-person patterns
+(work, preferences, residence, education, possessions and background). Paragraphs over
+600 characters are left to raw journal retrieval rather than shortened and potentially
+misrepresented. It is deliberately not a general semantic extractor. There is no journal
+edit/delete UI yet; stale/orphaned rows are excluded, and replacement validates revisions.
+Future edit/delete commands must invoke replacement/removal in their storage transaction.
+
+Validation: shared tests cover automatic extraction, completed-entry backfill, negative
+qualifications, failure/retry, original-source answer payloads, stale/orphan exclusion,
+legacy preservation, repeat extraction, reopen and export. iPhone UI and migration of an
+installed pre-change store still require Xcode/device validation.

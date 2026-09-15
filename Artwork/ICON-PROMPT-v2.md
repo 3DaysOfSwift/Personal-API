@@ -1,0 +1,5 @@
+# Personal API icon revision
+
+Generated with the built-in image generation tool. Saved as PersonalAPI-Icon-v2.png for review.
+
+Use case: precise-object-edit. Edit the supplied Personal API app icon. Preserve its pure black square background, centered fingerprint-and-chat symbol, pearl-white subtly dimensional material and monochrome elegance. Replace the few thick fingerprint ridges with roughly 7-9 more numerous slender clean fingerprint ridges, with generous black gaps so they remain legible at iPhone home-screen size. Enlarge the central outlined speech bubble substantially, approximately 40 percent of the whole symbol width, retaining a clear chat tail. Add three delicate curved fingerprint ridges inside that bubble, with plenty of negative space and no clutter. The outer fingerprint should feel organic, not concentric target circles. Keep rounded ridge ends and understated highlights, less bulky than original. Full square opaque app icon artwork, no pre-rounded outer corners, no text, no mockup, no phone, no border. Single finished icon.

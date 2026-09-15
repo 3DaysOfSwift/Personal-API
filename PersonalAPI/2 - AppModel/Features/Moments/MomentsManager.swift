@@ -9,13 +9,16 @@ import Observation
     private var loaded = false
     private let repository: any PersonalDataRepository
     private let processor: any MomentProcessor
+    private let factExtractor: any JournalFactExtracting
+    private var indexedSources: [UUID: String] = [:]
     private let now: @Sendable () -> Date
     private var enrichmentTask: Task<Void, Never>?
     private var busy = false
     private var waiters: [CheckedContinuation<Void, Never>] = []
 
-    init(repository: any PersonalDataRepository, processor: any MomentProcessor, now: @escaping @Sendable () -> Date) {
+    init(repository: any PersonalDataRepository, processor: any MomentProcessor, now: @escaping @Sendable () -> Date, factExtractor: (any JournalFactExtracting)? = nil) {
         self.repository = repository; self.processor = processor; self.now = now
+        self.factExtractor = factExtractor ?? LocalJournalFactExtractor(now: now)
     }
     // Serialise persistence AND publication across suspension, preventing stale refreshes.
     private func acquire() async {
@@ -72,18 +75,29 @@ import Observation
     private func analysePendingSources() async {
         var attempted: Set<UUID> = []
         enrichmentError = nil
-        while let moment = moments.first(where: { $0.processingState != "complete" && !attempted.contains($0.id) }) {
+        while let moment = moments.first(where: {
+            ($0.processingState != "complete" || indexedSources[$0.id] != $0.text) && !attempted.contains($0.id)
+        }) {
             attempted.insert(moment.id)
-            do {
-                let result = try await processor.analyse(MomentInput(text: moment.text, createdAt: moment.createdAt))
-                await acquire()
+            if moment.processingState != "complete" {
                 do {
-                    let updated = try await repository.saveAnalysis(result, momentID: moment.id)
-                    if let index = moments.firstIndex(where: { $0.id == moment.id }) { moments[index] = updated }
-                    release()
-                } catch { release(); throw error }
+                    let result = try await processor.analyse(MomentInput(text: moment.text, createdAt: moment.createdAt))
+                    await acquire()
+                    do {
+                        let updated = try await repository.saveAnalysis(result, momentID: moment.id)
+                        if let index = moments.firstIndex(where: { $0.id == moment.id }) { moments[index] = updated }
+                        release()
+                    } catch { release(); throw error }
+                } catch {
+                    enrichmentError = "Your original text is saved. Metadata needs a retry: \(error.localizedDescription)"
+                }
+            }
+            do {
+                let facts = try await factExtractor.extract(from: moment)
+                try await repository.replaceDerivedFacts(facts, source: moment)
+                indexedSources[moment.id] = moment.text
             } catch {
-                enrichmentError = "Your original text is saved. Metadata needs a retry: \(error.localizedDescription)"
+                enrichmentError = "Your original text is saved. Search indexing needs a retry: \(error.localizedDescription)"
             }
         }
     }
@@ -96,6 +110,7 @@ import Observation
             moments = try await repository.markAnalysesPending()
             release()
         } catch { release(); throw error }
+        indexedSources.removeAll()
         await enrichPendingMoments()
     }
 }

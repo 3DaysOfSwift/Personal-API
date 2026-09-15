@@ -109,3 +109,31 @@ The macOS tests establish behaviour for the shared code, not an end-to-end iPhon
 - iPhone Simulator build-for-testing: succeeded with the existing development-environment compiler flag.
 - Added checks for bounded question context, fresh journal reads after logging, saved chat reload, feedback persistence, cancellation, failed writes, corrupt archive preservation, and independent chat deletion.
 - No simulator UI or live Foundation Models inference was executed by this validation. Follow Documentation/CONVERSATION_TESTING.md in the user's existing simulator. Existing journal data was not erased or migrated.
+
+## Local query index — 15 September 2026
+
+Shared macOS checks: 56 passed, one live-model test skipped, no failures. Added boundary checks proving a job query does not send school-only passages to the semantic worker, childhood remains searchable, topic changes drop old context, follow-ups retain references, new/deleted entries refresh candidates, unmatched queries do not call AI, and candidate payloads are bounded exact source excerpts. Project-file syntax passes validation. Live inference and simulator UI remain unverified in this environment.
+
+## Job-answer regression tests — 15 September 2026
+
+57 deterministic checks passed, 3 opt-in live checks skipped. Direct live generation was attempted separately and failed at model-service connection with sandbox restriction error 159; no live answer-quality conclusion is supported. The PersonalAPI Live AI Checks scheme enables direct and end-to-end checks from Xcode. Details: Documentation/JOB-ANSWER-TEST-RESULTS.md.
+
+## Automatic journal fact indexing — 2026-09-15
+
+Shared macOS suite: 70 tests executed, 66 passed, 4 opt-in live model tests skipped,
+0 failures. Includes real temporary SwiftData stores for replacement, reopen, export,
+legacy preservation and rejected unsupported replacements. New feature tests cover
+backfill, extraction failure/retry, qualifications, source-grounded search payloads,
+and stale/orphaned source exclusion. Diff whitespace check passed.
+This does not validate the installed iPhone store migration or the live AI model.
+Device follow-up: launch with an existing journal, let indexing finish, query an
+explicit recorded statement, and inspect its original journal source. No Facts input
+screen should appear. No user data was erased and no commit was made.
+
+## Launch build repair — 16 September 2026
+
+Removed the failing LaunchScreen.storyboard and all project references. Both app configurations now merge an explicit Info.plist containing UILaunchScreen with LaunchBackground and LaunchBrand assets. The launch artwork preserves the existing fingerprint and grey wordmark. Project/plist syntax and git diff whitespace checks pass. A fresh simulator build contains no CompileStoryboard step; full build remains unverified because asset compilation cannot access any simulator runtimes in this execution environment. Device appearance remains unverified.
+
+## Chat layout cycle repair — 16 September 2026
+
+User confirmed the app runs after the launch repair, but supplied repeated AttributeGraph cycle warnings. Removed the composer geometry callback and the SwiftUI clearance/height state that rebuilt the hosted composer after layout. Transcript and composer now share a native controller with direct constraints to one another and the keyboard guide. Removed the obsolete passthrough overlay controller. Responder changes are deferred outside updateUIView and coalesced using the current focus request. Swift parsing, standalone iOS SDK typechecking of both native components, and diff checks pass. Runtime disappearance of the warnings and interactive keyboard tracking still require device validation; no simulator runtime is accessible here.

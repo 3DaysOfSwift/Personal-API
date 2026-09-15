@@ -1,0 +1,69 @@
+PROMPT AND DATA COMPARISON
+Synthetic entries only. Fresh session per request; greedy sampling; no retrieval.
+Review the actual text: nonempty output alone is not a correct answer.
+
+DATA: one entry | PROMPT: current
+QUESTION: What is my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: one entry | PROMPT: short
+QUESTION: What is my job?
+RESPONSE: Your job is an iOS developer. 
+
+DATA: one entry | PROMPT: current
+QUESTION: Do I like my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: one entry | PROMPT: short
+QUESTION: Do I like my job?
+RESPONSE: Based on the journal excerpt, you like your job.
+
+DATA: three identical entries | PROMPT: current
+QUESTION: What is my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: three identical entries | PROMPT: short
+QUESTION: What is my job?
+RESPONSE: Your job is an iOS developer. 
+
+DATA: three identical entries | PROMPT: current
+QUESTION: Do I like my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: three identical entries | PROMPT: short
+QUESTION: Do I like my job?
+RESPONSE: Yes, you like your job. 
+
+DATA: three distinct supporting entries | PROMPT: current
+QUESTION: What is my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: three distinct supporting entries | PROMPT: short
+QUESTION: What is my job?
+RESPONSE: Your job is an iOS developer. 
+
+DATA: three distinct supporting entries | PROMPT: current
+QUESTION: Do I like my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: three distinct supporting entries | PROMPT: short
+QUESTION: Do I like my job?
+RESPONSE: Yes, you like your job. 
+
+DATA: missing-information control | PROMPT: current
+QUESTION: What is my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: missing-information control | PROMPT: short
+QUESTION: What is my job?
+RESPONSE: I cannot answer that question.
+
+DATA: missing-information control | PROMPT: current
+QUESTION: Do I like my job?
+RESPONSE: [INSUFFICIENT_MEMORY]
+
+DATA: missing-information control | PROMPT: short
+QUESTION: Do I like my job?
+RESPONSE: I cannot answer that question.
+
+Explicit abstentions with supporting evidence: 6. Service errors: 0.

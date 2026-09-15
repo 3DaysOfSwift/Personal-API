@@ -24,6 +24,13 @@ actor MemoryRepository: PersonalDataRepository {
     }
     func loadFacts() throws -> [PersonalFactSnapshot] { if fails { throw TestFailure.unavailable }; return facts }
     func saveFact(_ fact: PersonalFactSnapshot) throws { if fails { throw TestFailure.unavailable }; facts.insert(fact, at: 0) }
+    func replaceDerivedFacts(_ replacements: [PersonalFactSnapshot], source: MomentSnapshot) throws {
+        if fails { throw TestFailure.unavailable }
+        guard moments.contains(where: { $0.id == source.id && $0.text == source.text }),
+              replacements.allSatisfy({ $0.isSupported(by: source) }) else { throw MomentError.missingMoment }
+        facts.removeAll { $0.derivation?.momentID == source.id }
+        facts.append(contentsOf: replacements)
+    }
     func exportArchive() throws -> Data {
         if fails { throw TestFailure.unavailable }
         return try JSONEncoder().encode(PersonalArchive(exportedAt: Date(timeIntervalSince1970: 100), moments: moments.map(PersonalArchive.MomentRecord.init), facts: facts))
@@ -58,7 +65,7 @@ actor FailingProcessor: MomentProcessor {
         let now: @Sendable () -> Date = { Date(timeIntervalSince1970: 1_000) }
         let moments = MomentsManager(repository: repository, processor: processor ?? LocalMomentProcessor(now: now), now: now)
         let profile = ProfileManager(repository: repository, now: now)
-        let query = QueryManager(repository: repository, retriever: MomentRetriever())
+        let query = QueryManager(repository: repository, retriever: MomentRetriever(), index: LocalQueryIndex())
         app = AppModel(moments: moments, profile: profile,
                        query: query,
                        authentication: AuthenticationManager(client: authentication, preferences: preferences),

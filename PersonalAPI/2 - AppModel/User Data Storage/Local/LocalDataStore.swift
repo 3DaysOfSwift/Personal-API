@@ -56,14 +56,48 @@ actor LocalDataStore: PersonalDataRepository {
     }
     func loadFacts() throws -> [PersonalFactSnapshot] {
         try makeContext().fetch(FetchDescriptor<PersonalFact>()).sorted { $0.createdAt > $1.createdAt }.map {
-            PersonalFactSnapshot(id: $0.id, label: $0.label, value: $0.value, createdAt: $0.createdAt)
+            PersonalFactSnapshot(id: $0.id, label: $0.label, value: $0.value, createdAt: $0.createdAt,
+                derivation: try $0.derivationData.map { try JSONDecoder().decode(FactDerivation.self, from: $0) })
         }
     }
     func saveFact(_ value: PersonalFactSnapshot) throws {
         let context = try makeContext()
         let record = PersonalFact(label: value.label, value: value.value)
         record.id = value.id; record.createdAt = value.createdAt
+        record.derivationData = try value.derivation.map { try JSONEncoder().encode($0) }
         context.insert(record)
+        try context.save()
+    }
+    func replaceDerivedFacts(_ facts: [PersonalFactSnapshot], source: MomentSnapshot) throws {
+        let context = try makeContext()
+        guard let current = try context.fetch(FetchDescriptor<Moment>()).first(where: { $0.id == source.id }),
+              current.text == source.text, facts.allSatisfy({ $0.isSupported(by: source) }) else {
+            throw MomentError.missingMoment
+        }
+        let records = try context.fetch(FetchDescriptor<PersonalFact>())
+        let existing = try records.filter { record in
+            guard let data = record.derivationData else { return false }
+            return try JSONDecoder().decode(FactDerivation.self, from: data).momentID == source.id
+        }
+        if existing.count == facts.count && existing.allSatisfy({ record in
+            facts.contains { fact in
+                record.label == fact.label && record.value == fact.value &&
+                    (record.derivationData.flatMap { try? JSONDecoder().decode(FactDerivation.self, from: $0) }) == fact.derivation
+            }
+        }) { return }
+        for record in existing {
+            if let data = record.derivationData,
+               try JSONDecoder().decode(FactDerivation.self, from: data).momentID == source.id {
+                context.delete(record)
+            }
+        }
+        for fact in facts {
+            let record = PersonalFact(label: fact.label, value: fact.value)
+            record.id = fact.id; record.createdAt = fact.createdAt
+            record.derivationData = try fact.derivation.map { try JSONEncoder().encode($0) }
+            context.insert(record)
+        }
+        // One transaction: readers never see a partially replaced extraction.
         try context.save()
     }
     func exportArchive() throws -> Data {

@@ -23,7 +23,7 @@ import Foundation
         let preferences = LocalPreferences(defaults: .standard)
         let moments = MomentsManager(repository: repository, processor: LocalMomentProcessor(now: now), now: now)
         let profile = ProfileManager(repository: repository, now: now)
-        let query = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: OnDeviceMomentSearch(), answerer: OnDeviceMomentAnswerer())
+        let query = QueryManager(repository: repository, retriever: MomentRetriever(), index: LocalQueryIndex(), semanticSearch: OnDeviceMomentSearch(), answerer: OnDeviceMomentAnswerer())
         let chatURL = URL.applicationSupportDirectory.appendingPathComponent("PersonalAPI/conversations-v1.json")
         let conversations = ConversationsManager(repository: LocalConversationStore(url: chatURL), query: query, now: now)
         return AppModel(moments: moments, profile: profile,
