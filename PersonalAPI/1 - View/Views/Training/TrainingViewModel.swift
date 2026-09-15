@@ -5,6 +5,7 @@ import Observation
     var hasEventDate = false
     var eventDate = Date()
     private(set) var error: String?
+    private(set) var didSave = false
     private(set) var isSaving = false
     private let momentsFeature: any MomentsFeature
     init(moments: any MomentsFeature = AppModel.shared.momentsFeature) { momentsFeature = moments }
@@ -17,10 +18,11 @@ import Observation
     func retry() async { await momentsFeature.refresh() }
     func save() async {
         guard !isSaving else { return }
+        didSave = false
         isSaving = true; defer { isSaving = false }
         do {
             try await momentsFeature.recordMoment(text: text, happenedAt: hasEventDate ? eventDate : nil)
-            text = ""; hasEventDate = false; error = nil
+            text = ""; hasEventDate = false; error = nil; didSave = true
         } catch { self.error = "Your draft is still here. \(error.localizedDescription)" }
     }
 }

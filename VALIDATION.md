@@ -102,3 +102,10 @@ This constrained tool environment required local cache directories and command-l
 - Foundation Models, iCloud, semantic retrieval and imports: still outside this slice.
 
 The macOS tests establish behaviour for the shared code, not an end-to-end iPhone verification or coverage percentage.
+
+## Conversation prototype — 15 September 2026
+
+- Shared macOS suite: 45 passed, 1 opt-in live-model check skipped, no failures.
+- iPhone Simulator build-for-testing: succeeded with the existing development-environment compiler flag.
+- Added checks for bounded question context, fresh journal reads after logging, saved chat reload, feedback persistence, cancellation, failed writes, corrupt archive preservation, and independent chat deletion.
+- No simulator UI or live Foundation Models inference was executed by this validation. Follow Documentation/CONVERSATION_TESTING.md in the user's existing simulator. Existing journal data was not erased or migrated.

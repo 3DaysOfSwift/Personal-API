@@ -8,6 +8,7 @@ import XCTest
         vm.text = original
         await vm.save()
         XCTAssertEqual(vm.text, "")
+        XCTAssertTrue(vm.didSave)
         XCTAssertEqual(vm.moments.first?.text, original)
         await graph.app.momentsFeature.enrichPendingMoments()
         XCTAssertEqual(vm.moments.first?.text, original)
@@ -22,6 +23,7 @@ import XCTest
         XCTAssertEqual(vm.text, "Keep this thought")
         XCTAssertTrue(vm.moments.isEmpty)
         XCTAssertNotNil(vm.error)
+        XCTAssertFalse(vm.didSave)
     }
     func testWhitespaceIsRejected() async {
         let graph = TestAppModelFactory()
@@ -31,5 +33,6 @@ import XCTest
         await vm.save()
         XCTAssertTrue(vm.moments.isEmpty)
         XCTAssertNotNil(vm.error)
+        XCTAssertFalse(vm.didSave)
     }
 }

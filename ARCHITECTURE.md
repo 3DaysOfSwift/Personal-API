@@ -139,7 +139,7 @@ The context budget remains 6,000 characters, at most 2,000 per Moment. Omitted
 context is disclosed. Model refusals, context overflow, unavailable assets, language
 limitations and service errors are presented as answer failures, never as successful
 match-count responses. The composer is bottom-inset with a 96-point resting gap. Query hides the tab bar by default and offers a top navigation toggle. Focusing the composer hides tabs and reduces the gap to 12 points above the keyboard. These are local View presentation states.
-This is still a single-question interface, not persistent multi-turn conversation.
+Query now displays persistent multi-turn conversations; see the conversation feature below.
 
 ## Local model reliability
 
@@ -161,3 +161,27 @@ memories to a second-person response. Relationship-first answers use recorded de
 only. Perceptions remain attributed and time-bounded; the prompt must not infer "always",
 locations or stronger claims than the source supports. Style instructions contain no fictional personal facts: an earlier example contaminated
 a live response with an unsupported claim of loneliness and was removed.
+
+### Query gaps and journal invitations
+
+Query distinguishes a successful retrieval with no evidence, an explicit answer abstention, and technical model failures. Missing evidence invites the user to record more; service errors retain their actual failure message. The local answer prompt requests an exact abstention marker for unsupported questions. This is model-reported uncertainty, not proof that the entire dataset lacks the information.
+
+“Log a memory about this” opens Training with the submitted question as context. The question and generated answer are never automatically stored as journal facts. Only the user's typed entry is saved through the existing Moments feature. After saving, the user can return to Query and ask again.
+
+## Conversation feature
+
+QueryView → QueryViewModel → ConversationsFeature → ConversationsManager owns the chat workflow. QueryManager remains responsible for fresh journal retrieval and grounded generation. AppModel.live() explicitly composes both features and LocalConversationStore.
+
+Conversations are a separate versioned JSON archive in Application Support, written atomically by a repository actor. Existing SwiftData entities, journal data and bundle identity are unchanged. Questions are saved before inference. Interrupted turns can be answered again; retries replace only the latest answer without duplicating its question. A single in-flight mutation prevents archive writes racing across suspension. Failed writes are surfaced and never published as saved state.
+
+The model receives the current question and at most four earlier questions (500 characters each) to resolve conversational references. Earlier generated answers and feedback are excluded from the model input. Only freshly retrieved journal text is evidence. This deliberately bounded prototype may need clarification when a reference depends on older discussion or an AI answer. Prompt guidance is not a factuality guarantee.
+
+Saved chats retain answer results, source snapshots and optional feedback. Deleting a chat only deletes its archive entry. Chat export is available independently from journal export, via the conversation menu. Feedback is local evaluation data; it is neither model training nor a journal correction.
+
+UI state (selected conversation, composer, sheets, keyboard and cancellable task) remains in QueryView/QueryViewModel. The conversation feature owns authoritative messages and persistence. The raised composer and navigation toggle are preserved.
+
+## Qualified answers and retained passages
+
+Semantic retrieval now returns the selected original passages as well as Moment identity. QueryManager verifies each passage is a nonempty exact substring of its source before forwarding it. AnswerContext passes these excerpts to generation instead of replacing them with the first 2,000 characters of each record. The 6,000-character budget keeps whole passages; omitted context remains disclosed.
+
+Answer instructions permit partial and qualified answers from mixed or uncertain recollections. They preserve negation and distinguish present-day judgments from feelings at the time. No personal example or question-specific answer is embedded. Refusals remain reported and are not automatically retried. This improves evidence delivery but cannot guarantee model compliance or factual accuracy. Optional passage metadata remains compatible with older saved chats.

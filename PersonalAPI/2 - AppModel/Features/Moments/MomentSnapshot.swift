@@ -1,7 +1,7 @@
 import Foundation
 
 /// Immutable source values cross the repository boundary; SwiftData objects never do.
-struct MomentSnapshot: Identifiable, Sendable, Equatable {
+struct MomentSnapshot: Identifiable, Codable, Sendable, Equatable {
     let id: UUID
     let text: String
     let createdAt: Date

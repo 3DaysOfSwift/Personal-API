@@ -58,9 +58,26 @@ actor FailingProcessor: MomentProcessor {
         let now: @Sendable () -> Date = { Date(timeIntervalSince1970: 1_000) }
         let moments = MomentsManager(repository: repository, processor: processor ?? LocalMomentProcessor(now: now), now: now)
         let profile = ProfileManager(repository: repository, now: now)
+        let query = QueryManager(repository: repository, retriever: MomentRetriever())
         app = AppModel(moments: moments, profile: profile,
-                       query: QueryManager(repository: repository, retriever: MomentRetriever()),
+                       query: query,
                        authentication: AuthenticationManager(client: authentication, preferences: preferences),
-                       settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile))
+                       settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile),
+                       conversations: ConversationsManager(repository: MemoryConversationRepository(), query: query, now: now))
     }
+}
+
+actor MemoryConversationRepository: ConversationRepository {
+    var items: [Conversation] = []
+    var fails = false
+    func setFailure(_ value: Bool) { fails = value }
+    func load() throws -> [Conversation] {
+        if fails { throw TestFailure.unavailable }
+        return items
+    }
+    func save(_ conversations: [Conversation]) throws {
+        if fails { throw TestFailure.unavailable }
+        items = conversations
+    }
+    func export(_ conversations: [Conversation]) throws -> Data { try JSONEncoder().encode(conversations) }
 }

@@ -20,7 +20,90 @@ private struct AnswerStub: MomentAnswering {
     func answer(question: String, evidence: [Evidence]) async throws -> GroundedAnswer? { result }
 }
 
+private actor ContextSearchCapture: SemanticMomentSearching {
+    var questions: [String] = []
+    func match(question: String, moments: [MomentSnapshot]) async throws -> [UUID] {
+        questions.append(question)
+        return moments.map(\.id)
+    }
+}
+private struct SourceAnswer: MomentAnswering {
+    func answer(question: String, evidence: [Evidence]) async throws -> GroundedAnswer? {
+        GroundedAnswer(text: evidence.map { $0.moment.text }.joined(separator: " "), citations: [])
+    }
+}
+private struct PassageStub: SemanticMomentSearching {
+    let passages: [SearchPassage]
+    func match(question: String, moments: [MomentSnapshot]) async throws -> [UUID] { passages.map(\.momentID) }
+    func selectPassages(question: String, moments: [MomentSnapshot]) async throws -> [SearchPassage] { passages }
+}
+private struct ContextAnswer: MomentAnswering {
+    func answer(question: String, evidence: [Evidence]) async throws -> GroundedAnswer? {
+        GroundedAnswer(text: AnswerContext(evidence: evidence).passages.map(\.text).joined(separator: " "), citations: [])
+    }
+}
 @MainActor final class QueryManagerTests: XCTestCase {
+    func testChatContextIsBoundedAndRetryReadsNewJournalEvidence() async throws {
+        let repository = MemoryRepository()
+        let search = ContextSearchCapture()
+        let query = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: search, answerer: SourceAnswer())
+        let original = moment("I attended school.")
+        try await repository.saveMoment(original)
+        let chats = ConversationsManager(repository: MemoryConversationRepository(), query: query, now: { Date() })
+        let id = UUID()
+        try await chats.send("Did I enjoy school?", in: id)
+        try await repository.saveMoment(moment("I enjoyed the art lessons."))
+        try await chats.answerAgain(in: id)
+        XCTAssertTrue(chats.conversations.first!.turns.last!.result!.generatedAnswer!.text.contains("art lessons"))
+        let stored = try await repository.loadMoments()
+        XCTAssertEqual(stored.count, 2)
+        try await chats.delete(id)
+        let afterDeletion = try await repository.loadMoments()
+        XCTAssertEqual(afterDeletion, stored)
+        _ = try await query.search("Did I enjoy it?", previousQuestions: ["old"] + Array(repeating: String(repeating: "q", count: 600), count: 4))
+        let payload = await search.questions.last!
+        let json = try JSONDecoder().decode([String: [String]].self, from: Data(payload.utf8))
+        XCTAssertEqual(json["currentQuestion"], ["Did I enjoy it?"])
+        XCTAssertEqual(json["previousQuestions"]?.count, 4)
+        XCTAssertTrue(json["previousQuestions"]!.allSatisfy { $0.count == 500 })
+    }
+    func testRelevantTailReachesAnswerInsteadOfUnrelatedEntryBeginning() async throws {
+        let relevant = "I don’t remember disliking school, but I felt confused about the lessons."
+        let source = moment(String(repeating: "An unrelated memory. ", count: 200) + relevant)
+        let repository = MemoryRepository(); try await repository.saveMoment(source)
+        let search = PassageStub(passages: [SearchPassage(momentID: source.id, text: relevant)])
+        let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: search, answerer: ContextAnswer())
+        let result = try await manager.search("Did I enjoy school?")
+        XCTAssertEqual(result.generatedAnswer?.text, relevant)
+        XCTAssertEqual(result.evidence.first?.moment.text, source.text)
+        XCTAssertEqual(result.evidence.first?.passages, [relevant])
+    }
+    func testInventedPassageCannotBecomeAnswerEvidence() async throws {
+        let source = moment("I attended school.")
+        let repository = MemoryRepository(); try await repository.saveMoment(source)
+        let search = PassageStub(passages: [SearchPassage(momentID: source.id, text: "I loved school.")])
+        let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: search, answerer: ContextAnswer())
+        let result = try await manager.search("school")
+        XCTAssertNil(result.generatedAnswer)
+        guard case .keywords = result.method else { return XCTFail("Reject invented text") }
+    }
+    func testContextPreservesWholeQualificationAndReportsOmission() {
+        let text = "I remember liking the games, but not the lessons."
+        let source = moment(text)
+        let context = AnswerContext(evidence: [Evidence(moment: source, score: 1, passages: [text])], characterBudget: text.count - 1)
+        XCTAssertTrue(context.passages.isEmpty)
+        XCTAssertTrue(context.limited)
+        let complete = AnswerContext(evidence: [Evidence(moment: source, score: 1, passages: [text])])
+        XCTAssertEqual(complete.passages.first?.text, text)
+        XCTAssertFalse(complete.limited)
+    }
+    func testOlderSavedEvidenceWithoutPassagesStillDecodes() throws {
+        let evidence = Evidence(moment: moment("Original memory"), score: 1)
+        let data = try JSONEncoder().encode(evidence)
+        let decoded = try JSONDecoder().decode(Evidence.self, from: data)
+        XCTAssertNil(decoded.passages)
+        XCTAssertEqual(AnswerContext(evidence: [decoded]).passages.first?.text, "Original memory")
+    }
     private func moment(_ text: String) -> MomentSnapshot {
         MomentSnapshot(id: UUID(), text: text, createdAt: Date(), happenedAt: nil,
                        source: "journal", analysisData: nil, processingState: "pending")
@@ -114,6 +197,7 @@ private struct AnswerStub: MomentAnswering {
         XCTAssertNil(result.generatedAnswer)
         XCTAssertNotNil(result.answerIssue)
         XCTAssertEqual(result.evidence.count, 1)
+        XCTAssertTrue(result.needsMoreMemories)
     }
     func testOnDeviceModelWithSyntheticJournalWhenRequested() async throws {
         guard ProcessInfo.processInfo.environment["PERSONAL_API_LIVE_AI_TEST"] == "1" else {
@@ -142,6 +226,7 @@ private struct AnswerStub: MomentAnswering {
         let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: SearchStub(ids: [], failure: .unavailable("Model not ready")))
         let result = try await manager.search("garden")
         XCTAssertEqual(result.method, .keywords(reason: "Model not ready"))
+        XCTAssertFalse(result.needsMoreMemories)
         XCTAssertEqual(result.evidence.first?.id, source.id)
     }
     func testInventedSourceIDCannotBecomeEvidence() async throws {
@@ -169,5 +254,6 @@ private struct AnswerStub: MomentAnswering {
         let result = try await manager.search("garden")
         XCTAssertEqual(result.method, .onDeviceAI)
         XCTAssertTrue(result.evidence.isEmpty)
+        XCTAssertTrue(result.needsMoreMemories)
     }
 }

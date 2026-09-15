@@ -5,13 +5,15 @@ import Foundation
     static let shared = AppModel.live()
     let momentsFeature: any MomentsFeature
     let profileFeature: any ProfileFeature
+    let conversationsFeature: any ConversationsFeature
     let queryFeature: any QueryFeature
     let authenticationFeature: any AuthenticationFeature
     let settingsFeature: any SettingsFeature
     private var launchTask: Task<Void, Never>?
 
     init(moments: any MomentsFeature, profile: any ProfileFeature, query: any QueryFeature,
-         authentication: any AuthenticationFeature, settings: any SettingsFeature) {
+         authentication: any AuthenticationFeature, settings: any SettingsFeature, conversations: any ConversationsFeature) {
+        conversationsFeature = conversations
         momentsFeature = moments; profileFeature = profile; queryFeature = query
         authenticationFeature = authentication; settingsFeature = settings
     }
@@ -21,10 +23,13 @@ import Foundation
         let preferences = LocalPreferences(defaults: .standard)
         let moments = MomentsManager(repository: repository, processor: LocalMomentProcessor(now: now), now: now)
         let profile = ProfileManager(repository: repository, now: now)
+        let query = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: OnDeviceMomentSearch(), answerer: OnDeviceMomentAnswerer())
+        let chatURL = URL.applicationSupportDirectory.appendingPathComponent("PersonalAPI/conversations-v1.json")
+        let conversations = ConversationsManager(repository: LocalConversationStore(url: chatURL), query: query, now: now)
         return AppModel(moments: moments, profile: profile,
-                        query: QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: OnDeviceMomentSearch(), answerer: OnDeviceMomentAnswerer()),
+                        query: query,
                         authentication: AuthenticationManager(client: LocalDeviceAuthentication(), preferences: preferences),
-                        settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile))
+                        settings: SettingsManager(preferences: preferences, repository: repository, moments: moments, profile: profile), conversations: conversations)
     }
     func applicationDidFinishLaunching() {
         guard launchTask == nil else { return }

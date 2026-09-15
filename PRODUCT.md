@@ -44,3 +44,9 @@ No iCloud synchronization, import, HealthKit, attachments, semantic index, netwo
 - Semantic retrieval evaluated against a small labelled collection of known questions and source IDs.
 - Evidence-grounded synthesis evaluated separately from retrieval.
 - Opt-in private iCloud synchronization after account, conflict and migration testing.
+
+## Conversation prototype
+
+Query supports saved conversations with follow-up questions, a New chat action and independent chat deletion/export. Journal entries remain the factual source. Conversational questions help interpret references but are not automatically saved as life facts. Previous AI output never becomes evidence for the next answer.
+
+When information is missing, log a memory from the conversation, save it, return and choose Answer again. Each answer fetches current journal evidence. Useful/Not helpful feedback and an optional explanation are saved against the answer for evaluation, not local-model training.

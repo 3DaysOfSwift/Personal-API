@@ -1,70 +1,46 @@
 import XCTest
 @testable import PersonalAPI
-@MainActor private final class DeferredQuery: QueryFeature {
-    var pending: [String: CheckedContinuation<QueryResult, Error>] = [:]
-    func canSearch(_ question: String) -> Bool { true }
-    func search(_ question: String) async throws -> QueryResult {
-        try await withCheckedThrowingContinuation { pending[question] = $0 }
-    }
-}
+
 @MainActor final class QueryViewModelTests: XCTestCase {
-    func testAnswerFailureIsTheResponseNotAMatchCount() async {
-        let query = DeferredQuery(); let vm = QueryViewModel(query: query)
-        vm.question = "Who is Alex?"
-        let task = Task { await vm.search() }
-        while query.pending[vm.question] == nil { await Task.yield() }
-        query.pending.removeValue(forKey: vm.question)?.resume(returning: QueryResult(evidence: [], searchedCount: 1, answerIssue: "The model declined this question.", method: .onDeviceAI))
-        await task.value
-        XCTAssertEqual(vm.answer, "The model declined this question.")
-        XCTAssertFalse(vm.hasAIAnswer)
+    func testMessagesRemainAndComposerClearsAfterSend() async throws {
+        let manager = ConversationsManager(repository: MemoryConversationRepository(), query: ConversationQueryStub(), now: { Date() })
+        let vm = QueryViewModel(chats: manager)
+        await vm.load()
+        vm.question = "Who was Alex?"
+        await vm.sendDraft()
+        vm.question = "Where did we meet?"
+        await vm.sendDraft()
+        XCTAssertEqual(vm.turns.count, 2)
+        XCTAssertEqual(vm.question, "")
+        XCTAssertEqual(vm.answer(for: vm.turns[0]), "Your recorded answer.")
     }
-    func testGeneratedAnswerIsDisplayedInsteadOfMatchCountMessage() async {
-        let query = DeferredQuery(); let vm = QueryViewModel(query: query)
-        vm.question = "Who is Alex?"
-        let task = Task { await vm.search() }
-        while query.pending[vm.question] == nil { await Task.yield() }
-        let generated = GroundedAnswer(text: "Alex is your school friend.", citations: [])
-        query.pending.removeValue(forKey: vm.question)?.resume(returning: QueryResult(evidence: [], searchedCount: 1, generatedAnswer: generated, method: .onDeviceAI))
-        await task.value
-        XCTAssertEqual(vm.answer, generated.text)
-        XCTAssertTrue(vm.hasAIAnswer)
+    func testFailedSaveKeepsDraft() async {
+        let store = MemoryConversationRepository()
+        let vm = QueryViewModel(chats: ConversationsManager(repository: store, query: ConversationQueryStub(), now: { Date() }))
+        await vm.load()
+        await store.setFailure(true)
+        vm.question = "Keep this question"
+        await vm.sendDraft()
+        XCTAssertEqual(vm.question, "Keep this question")
+        XCTAssertNotNil(vm.error)
+        XCTAssertTrue(vm.turns.isEmpty)
     }
-    func testKeywordEvidenceAndAbstention() async throws {
-        let graph = TestAppModelFactory()
-        try await graph.app.momentsFeature.recordMoment(text: "garden idea", happenedAt: nil)
-        let vm = QueryViewModel(query: graph.app.queryFeature)
-        vm.question = "garden"; await vm.search()
-        XCTAssertEqual(vm.results.first?.moment.text, "garden idea")
-        vm.question = "hospital"; await vm.search()
-        XCTAssertTrue(vm.searched); XCTAssertTrue(vm.results.isEmpty)
-        await graph.app.momentsFeature.enrichPendingMoments()
+    func testNewChatAndReopenPreserveHistory() async {
+        let vm = QueryViewModel(chats: ConversationsManager(repository: MemoryConversationRepository(), query: ConversationQueryStub(), now: { Date() }))
+        vm.question = "First chat"
+        await vm.sendDraft()
+        let original = vm.conversationID
+        vm.newChat()
+        XCTAssertTrue(vm.turns.isEmpty)
+        vm.open(original)
+        XCTAssertEqual(vm.turns.first?.question, "First chat")
     }
-    func testOldCompletionCannotReplaceNewSearch() async {
-        let query = DeferredQuery()
-        let vm = QueryViewModel(query: query)
-        vm.question = "old"
-        let old = Task { await vm.search() }
-        while query.pending["old"] == nil { await Task.yield() }
-        vm.question = "new"
-        let new = Task { await vm.search() }
-        while query.pending["new"] == nil { await Task.yield() }
-        query.pending.removeValue(forKey: "new")?.resume(returning: QueryResult(evidence: [], searchedCount: 2))
-        await new.value
-        query.pending.removeValue(forKey: "old")?.resume(returning: QueryResult(evidence: [], searchedCount: 1))
-        await old.value
-        XCTAssertEqual(vm.searchedCount, 2)
-        XCTAssertEqual(vm.submitted, "new")
-    }
-    func testDisappearingScreenDiscardsCompletion() async {
-        let query = DeferredQuery()
-        let vm = QueryViewModel(query: query)
-        vm.question = "old"
-        let request = Task { await vm.search() }
-        while query.pending["old"] == nil { await Task.yield() }
-        vm.cancelSearch()
-        query.pending.removeValue(forKey: "old")?.resume(returning: QueryResult(evidence: [], searchedCount: 1))
-        await request.value
-        XCTAssertFalse(vm.searched)
-        XCTAssertFalse(vm.isSearching)
+    func testFailureAndMissingEvidenceDisplayDistinctly() {
+        let vm = QueryViewModel(chats: ConversationsManager(repository: MemoryConversationRepository(), query: ConversationQueryStub(), now: { Date() }))
+        let failed = ChatTurn(id: UUID(), question: "Who?", createdAt: Date(), failure: "Model unavailable")
+        let missing = ChatTurn(id: UUID(), question: "Who?", createdAt: Date(),
+            result: QueryResult(evidence: [], searchedCount: 1, needsMoreMemories: true, method: .onDeviceAI))
+        XCTAssertEqual(vm.answer(for: failed), "Model unavailable")
+        XCTAssertTrue(vm.answer(for: missing).contains("enough information"))
     }
 }
