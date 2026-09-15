@@ -22,6 +22,15 @@ private struct AnswerStub: MomentAnswering {
         MomentSnapshot(id: UUID(), text: text, createdAt: Date(), happenedAt: nil,
                        source: "journal", analysisData: nil, processingState: "pending")
     }
+    func testConversationalAnswerDoesNotRequireGeneratedQuotations() async throws {
+        let source = moment("Alex is my school friend.")
+        let repository = MemoryRepository(); try await repository.saveMoment(source)
+        let answer = GroundedAnswer(text: "Alex is your school friend.", citations: [])
+        let manager = QueryManager(repository: repository, retriever: MomentRetriever(), semanticSearch: SearchStub(ids: [source.id]), answerer: AnswerStub(result: answer))
+        let result = try await manager.search("Who is Alex?")
+        XCTAssertEqual(result.generatedAnswer?.text, answer.text)
+        XCTAssertNil(result.answerIssue)
+    }
     func testSupportedAnswerIsReturnedWithOriginalEvidence() async throws {
         let source = moment("Alex is my school friend.")
         let repository = MemoryRepository(); try await repository.saveMoment(source)

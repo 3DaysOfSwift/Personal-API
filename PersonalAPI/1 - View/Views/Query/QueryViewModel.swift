@@ -23,6 +23,7 @@ import Observation
         searchTask?.cancel()
         searchTask = Task { await search() }
     }
+    func retryAnswer() { question = submitted; submitSearch() }
     func cancelSearch() {
         requestID = UUID()
         searchTask?.cancel(); searchTask = nil; isSearching = false
@@ -49,11 +50,18 @@ import Observation
                 searchMethod = "On-device AI · answered from your Moments"
                 answerNote = generated.contextLimited ? "This answer used excerpts from the retrieved Moments. Some text was outside the answer context; inspect the originals for more detail." : nil
             } else {
-            answerNote = result.answerIssue
-            switch result.outcome {
-            case .noEvidence: answer = "I don’t know enough about you yet. This search found no matching Moments. Try rephrasing your question."
-            case .matches: answer = "I found \(results.count) matching Moments. Read the original words below to judge whether they answer your question."
-            }
+                if let issue = result.answerIssue {
+                    answer = issue
+                } else {
+                    switch result.method {
+                    case .keywords(let reason):
+                        answer = reason ?? "I couldn’t generate an AI answer. On-device answering is unavailable for this search."
+                    case .onDeviceAI:
+                        answer = result.evidence.isEmpty
+                            ? "I don’t have enough information in your recorded memories to answer that yet."
+                            : "I couldn’t generate an answer from your memories. Please retry."
+                    }
+                }
             }
         } catch is CancellationError { }
         catch { if requestID == id { self.error = error.localizedDescription } }

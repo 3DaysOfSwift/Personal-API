@@ -30,7 +30,7 @@ Four tabs: Profile, Training (initial tab), Query, Settings. Dark mode only, con
 
 The current processor is deterministic and only extracts a title. The schema has space for factual tags, categories, themes, emotions, significance, life-event classification and evidence-supported event-date extraction. Foundation Models enrichment is not implemented yet.
 
-Query uses the on-device Foundation Models language model where available to select relevant original Moments by meaning, capped at 20 results. Model selection can be wrong. Retrieved sources support a concise on-device answer with validated source references and verbatim quotes; users can inspect the original entries. Availability or generation failure uses explicitly labelled keyword overlap. Relative-date resolution and cross-entry reasoning are not implemented. It searches Moments only; profile facts are stored and exported but not retrieved yet. Feedback is session-local.
+Query uses the on-device Foundation Models language model where available to select relevant original Moments by meaning, capped at 20 results. Model selection can be wrong. Retrieved sources support a concise on-device answer with optional inspection of the original sources; users can inspect the original entries. Availability or generation failure uses explicitly labelled keyword overlap. Relative-date resolution and cross-entry reasoning are not implemented. It searches Moments only; profile facts are stored and exported but not retrieved yet. Feedback is session-local.
 
 Face ID/device-passcode lock and inactive-screen concealment are included. This is an application access gate, not a separately encrypted vault. Exported JSON is plaintext and outside the app lock.
 

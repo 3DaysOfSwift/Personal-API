@@ -8,52 +8,66 @@ struct QueryView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("BABY API · QUERY LAB").font(.caption).tracking(2).foregroundStyle(theme.theme.secondary)
-                    Text("Ask about your life.").font(.largeTitle.bold())
-                    Text("Ask in your own words. On-device AI finds relevant Moments and answers from your own words. If it’s unavailable, we’ll show keyword results instead.").foregroundStyle(theme.theme.secondary)
-                    HStack {
-                        TextField("Try an idea, a person, a place…", text: $viewModel.question, axis: .vertical).submitLabel(.search).onSubmit { viewModel.submitSearch() }
-                        Button { viewModel.submitSearch() } label: { Image(systemName: "arrow.up.circle.fill").font(.title) }.accessibilityLabel("Search Moments").disabled(!viewModel.canSearch)
-                    }.padding(16).background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
-                    if viewModel.isSearching { ProgressView("Reading your Moments and preparing an answer…") }
+                    if !viewModel.searched && !viewModel.isSearching {
+                        Text("Ask about your life.").font(.largeTitle.bold())
+                        Text("A conversation grounded in your memories.")
+                            .foregroundStyle(theme.theme.secondary)
+                    }
+                    if viewModel.isSearching || viewModel.searched {
+                        HStack {
+                            Spacer(minLength: 32)
+                            Text(viewModel.submitted).padding(16)
+                                .background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
+                        }
+                    }
+                    if viewModel.isSearching { ProgressView("Thinking…") }
                     if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
                     if viewModel.searched {
-                        Text(viewModel.submitted).font(.headline)
-                        Text(viewModel.searchMethod).font(.caption).foregroundStyle(theme.theme.secondary)
-                        if viewModel.hasAIAnswer { Text("AI answer").font(.headline) }
+                        Label("Personal API", systemImage: "sparkles").font(.headline)
                         Text(viewModel.answer).textSelection(.enabled)
-                        if let note = viewModel.answerNote { Text(note).font(.caption).foregroundStyle(theme.theme.secondary) }
-                        if !viewModel.citations.isEmpty {
-                            DisclosureGroup("Supporting words") {
-                                ForEach(Array(viewModel.citations.enumerated()), id: \.offset) { _, citation in
-                                    Text("“\(citation.quote)”").font(.callout).padding(.vertical, 6)
-                                }
-                            }
+                        if let note = viewModel.answerNote {
+                            Text(note).font(.caption).foregroundStyle(theme.theme.secondary)
+                        }
+                        if !viewModel.hasAIAnswer && !viewModel.results.isEmpty {
+                            Button("Retry answer") { viewModel.retryAnswer() }.buttonStyle(.bordered)
                         }
                         if !viewModel.results.isEmpty {
-                            DisclosureGroup(viewModel.results.count == 1 ? "1 matching Moment" : "\(viewModel.results.count) matching Moments") {
+                            DisclosureGroup("Sources") {
+                                Text(viewModel.searchMethod).font(.caption).foregroundStyle(theme.theme.secondary)
                                 ForEach(viewModel.results) { evidence in
                                     NavigationLink { MomentDetailView(moment: evidence.moment) } label: {
                                         VStack(alignment: .leading, spacing: 8) {
-                                            Text(evidence.moment.text).lineLimit(5).multilineTextAlignment(.leading)
-                                            Text(evidence.moment.createdAt, style: .date).font(.caption).foregroundStyle(theme.theme.secondary)
+                                            Text(evidence.moment.text).lineLimit(3).multilineTextAlignment(.leading)
+                                            Text(evidence.moment.createdAt, style: .date).font(.caption)
                                         }.padding(.vertical, 10)
                                     }
                                 }
-                            }
-                            Text("Were these the right Moments?").font(.subheadline)
-                            HStack {
-                                Button("Useful") { viewModel.feedback = "Useful" }
-                                Button("Missed the mark") { viewModel.feedback = "Missed the mark" }
-                            }.buttonStyle(.bordered)
-                            if let feedback = viewModel.feedback { Text("This session: \(feedback)").font(.caption).foregroundStyle(theme.theme.secondary) }
+                            }.font(.subheadline).foregroundStyle(theme.theme.secondary)
                         }
-                        #if DEBUG
-                        Text("Diagnostics: \(viewModel.results.count) / \(viewModel.searchedCount) retrieved · limit 20 · original sources · profile facts excluded").font(.caption).foregroundStyle(theme.theme.secondary)
-                        #endif
+                        if viewModel.hasAIAnswer {
+                            HStack {
+                                Button("Useful answer", systemImage: "hand.thumbsup") { viewModel.feedback = "Useful" }
+                                Button("Not helpful", systemImage: "hand.thumbsdown") { viewModel.feedback = "Not helpful" }
+                            }.font(.caption).buttonStyle(.bordered)
+                            if let feedback = viewModel.feedback {
+                                Text("This session: \(feedback)").font(.caption).foregroundStyle(theme.theme.secondary)
+                            }
+                        }
                     }
-                }.padding(24)
-            }.navigationTitle("Query").navigationBarTitleDisplayMode(.inline).onDisappear { viewModel.cancelSearch() }
+                }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .safeAreaInset(edge: .bottom) {
+                HStack {
+                    TextField("Ask about your life…", text: $viewModel.question, axis: .vertical)
+                        .lineLimit(1...5).submitLabel(.send).onSubmit { viewModel.submitSearch() }
+                    Button { viewModel.submitSearch() } label: {
+                        Image(systemName: "arrow.up.circle.fill").font(.title)
+                    }.accessibilityLabel("Ask Personal API").disabled(!viewModel.canSearch)
+                }.padding(16).background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
+                    .padding(.horizontal, 20).padding(.vertical, 8)
+            }
+            .navigationTitle("Query").navigationBarTitleDisplayMode(.inline)
+            .onDisappear { viewModel.cancelSearch() }
         }
     }
 }

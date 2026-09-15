@@ -8,6 +8,16 @@ import XCTest
     }
 }
 @MainActor final class QueryViewModelTests: XCTestCase {
+    func testAnswerFailureIsTheResponseNotAMatchCount() async {
+        let query = DeferredQuery(); let vm = QueryViewModel(query: query)
+        vm.question = "Who is Alex?"
+        let task = Task { await vm.search() }
+        while query.pending[vm.question] == nil { await Task.yield() }
+        query.pending.removeValue(forKey: vm.question)?.resume(returning: QueryResult(evidence: [], searchedCount: 1, answerIssue: "The model declined this question.", method: .onDeviceAI))
+        await task.value
+        XCTAssertEqual(vm.answer, "The model declined this question.")
+        XCTAssertFalse(vm.hasAIAnswer)
+    }
     func testGeneratedAnswerIsDisplayedInsteadOfMatchCountMessage() async {
         let query = DeferredQuery(); let vm = QueryViewModel(query: query)
         vm.question = "Who is Alex?"

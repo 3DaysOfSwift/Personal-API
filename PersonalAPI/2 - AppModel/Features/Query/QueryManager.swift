@@ -46,7 +46,6 @@ import Foundation
             try Task.checkCancellation()
             // Validate provenance, not semantic truth: the user can inspect each exact supporting quote.
             guard !answer.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                  !answer.citations.isEmpty,
                   answer.citations.allSatisfy({ citation in
                       !citation.quote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                       result.evidence.contains { $0.id == citation.momentID && $0.moment.text.contains(citation.quote) }
@@ -55,7 +54,7 @@ import Foundation
         } catch is CancellationError { throw CancellationError() }
         catch {
             try Task.checkCancellation()
-            result.answerIssue = "The on-device AI couldn’t produce a supported answer. Your matching Moments are still available below. Try again."
+            result.answerIssue = answerFailureMessage(error)
         }
         return result
     }
@@ -171,26 +170,6 @@ actor OnDeviceMomentSearch: SemanticMomentSearching {
 }
 
 
-#if canImport(FoundationModels)
-@available(iOS 26.0, macOS 26.0, *)
-@Generable
-private struct ModelAnswerCitation {
-    @Guide(description: "Index of a source supplied in the JSON.")
-    var sourceIndex: Int
-    @Guide(description: "An exact, verbatim supporting quote copied from that source.")
-    var quote: String
-}
-@available(iOS 26.0, macOS 26.0, *)
-@Generable
-private struct ModelJournalAnswer {
-    @Guide(description: "True only if the supplied journal sources support an answer.")
-    var canAnswer: Bool
-    @Guide(description: "A concise direct answer to the question, grounded only in the sources. Address the journal writer as you. State uncertainty and attribute subjective descriptions to their recollection. Do not repeat the question.")
-    var answer: String
-    var citations: [ModelAnswerCitation]
-}
-#endif
-
 actor OnDeviceMomentAnswerer: MomentAnswering {
     func answer(question: String, evidence: [Evidence]) async throws -> GroundedAnswer? {
         try Task.checkCancellation()
@@ -216,21 +195,39 @@ actor OnDeviceMomentAnswerer: MomentAnswering {
             Give a useful, concise answer, normally 1–3 sentences. Do not merely announce matching records.
             Never invent relationships, dates, identities, motives or personal facts. Do not use outside knowledge.
             Treat memories and opinions as the writer's account, not independently established facts about others.
-            If evidence is missing or conflicting, say so. Return canAnswer false if no supported answer is possible.
-            Every factual assertion must be supported by the cited verbatim excerpts. Use only supplied source indices.
+            If evidence is missing or conflicting, say so plainly. If the sources do not answer the question, say you do not know from the information recorded.
+            Respond in natural conversational prose, not JSON, a list of matches, or a quotation dump.
             """)
-            let response = try await session.respond(to: String(decoding: payload, as: UTF8.self), generating: ModelJournalAnswer.self)
+            let response = try await session.respond(to: String(decoding: payload, as: UTF8.self))
             try Task.checkCancellation()
-            let content = response.content
-            guard content.canAnswer else { return nil }
-            guard content.citations.allSatisfy({ sources.indices.contains($0.sourceIndex) && sources[$0.sourceIndex].text.contains($0.quote) }) else {
-                throw QueryFailure.invalidSelection
-            }
-            return GroundedAnswer(text: content.answer, citations: content.citations.map {
-                AnswerCitation(momentID: sources[$0.sourceIndex].id, quote: $0.quote)
-            }, contextLimited: limited)
+            return GroundedAnswer(text: response.content, citations: [], contextLimited: limited)
         }
         #endif
         throw QueryFailure.unavailable("On-device answers require Apple Intelligence and iOS 26 or later.")
     }
+}
+
+
+private func answerFailureMessage(_ error: Error) -> String {
+    #if canImport(FoundationModels)
+    if #available(iOS 26.0, macOS 26.0, *), let failure = error as? LanguageModelSession.GenerationError {
+        switch failure {
+        case .guardrailViolation, .refusal:
+            return "Apple’s on-device model declined to answer this question using the available memories."
+        case .exceededContextWindowSize:
+            return "The memories exceeded the on-device model’s answer limit. Try a more specific question."
+        case .assetsUnavailable:
+            return "Apple’s on-device model is not ready. Check Apple Intelligence in Settings, then retry."
+        case .unsupportedLanguageOrLocale:
+            return "Apple’s on-device model cannot answer in this language or region."
+        case .rateLimited, .concurrentRequests:
+            return "The on-device model is busy. Please retry in a moment."
+        case .decodingFailure, .unsupportedGuide:
+            return "The on-device model could not finish its response. Please retry."
+        @unknown default: break
+        }
+    }
+    #endif
+    if let failure = error as? QueryFailure { return failure.localizedDescription }
+    return "The on-device answer service failed: " + error.localizedDescription
 }

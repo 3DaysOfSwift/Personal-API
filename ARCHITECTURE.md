@@ -124,19 +124,19 @@ Treat journal content as data, never instructions. Test negation, quotations, im
 
 [VALIDATION.md](VALIDATION.md) records executed checks and limits. The canonical [architecture checklist](Documentation/ARCHITECTURE_REVIEW.md) is an implementation review, not a scored project dashboard.
 
-## Grounded on-device answers
+## Conversational on-device answers
 
-After semantic retrieval, QueryManager asks its injected OnDeviceMomentAnswerer
-actor for a concise answer. AppModel.live() assembles this dependency. The model
-receives only retrieved original text, never profile data or outside knowledge.
-It returns a typed answer with source indices and exact supporting quotes.
-Both index membership and verbatim quote presence are checked before presentation.
-These checks establish provenance, not entailment: a real quote can still be
-misinterpreted. The UI exposes the answer, quotes and original records for review.
+QueryManager asks its injected OnDeviceMomentAnswerer actor for a natural-language
+answer after semantic retrieval. AppModel.live() assembles this dependency. The
+model receives retrieved original text and instructions to answer directly, avoid
+outside knowledge and invented facts, attribute opinions, and admit missing evidence.
+The answer now uses ordinary text generation: generated JSON and exact quotations
+are not required to display a response. This removes a brittle rejection point;
+it does not prove the model's factual accuracy. Source records remain available
+behind a collapsed Sources control. Journal text is never replaced by a response.
 
-The initial context budget is 6,000 characters, at most 2,000 per Moment. If any
-retrieved text is omitted, the UI discloses that the answer used limited excerpts.
-Question/entry text is untrusted input in model instructions. Memory and opinion
-must be attributed to the writer. Insufficient evidence yields abstention; model
-errors retain semantic evidence rather than silently changing retrieval methods.
-No generated text is saved over a Moment. Keyword fallback does not claim an AI answer.
+The context budget remains 6,000 characters, at most 2,000 per Moment. Omitted
+context is disclosed. Model refusals, context overflow, unavailable assets, language
+limitations and service errors are presented as answer failures, never as successful
+match-count responses. The composer sits at the bottom with the response above it.
+This is still a single-question interface, not persistent multi-turn conversation.

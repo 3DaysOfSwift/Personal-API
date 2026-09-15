@@ -1,3 +1,19 @@
+# Conversational response correction — 15 September 2026
+
+The user demonstrated answer failure on the simulator after successful retrieval.
+The previous catch-all error did not distinguish quote-validation failure from a
+Foundation Models error, so its exact cause cannot be inferred from that screenshot.
+
+Removed mandatory generated quotations/structured answer decoding. Plain-text model
+answers now occupy the main response area; sources are collapsed and failure reasons
+are explicit. Added regression tests for answers without quotes and failure wording.
+34 tests pass, one opt-in model test is skipped.
+The iPhone app/test targets build. Live answer generation remains unverified in this
+sandbox; the user must run the updated app to verify the response or see the actual
+model failure category. No claim of successful live answering is made from mocks.
+
+## Previous implementation evidence
+
 # Grounded answers — 15 September 2026
 
 - 32 deterministic tests pass; one opt-in live-model test is skipped by default.

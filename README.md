@@ -22,7 +22,7 @@ Read [PRODUCT.md](PRODUCT.md) for scope and principles, and [ARCHITECTURE.md](AR
 
 Use Product → Test. 22 tests cover the screen ViewModels, feature failures and concurrency, raw-source/export preservation, and SwiftData persistence. You can also run `swift test` on macOS to execute the same shared Model/ViewModel tests without Simulator. See VALIDATION.md for checks actually completed in this environment.
 
-The first processor extracts titles only. Query now uses on-device Foundation Models for semantic search when available (iOS 26+ and Apple Intelligence); other configurations show explicit keyword fallback. Every result opens the original entry. Query also produces a concise on-device answer with supporting quotes. iCloud sync, import and HealthKit remain deferred.
+The first processor extracts titles only. Query now uses on-device Foundation Models for semantic search when available (iOS 26+ and Apple Intelligence); other configurations show explicit keyword fallback. Every result opens the original entry. Query also produces a concise on-device answer with optional source inspection. iCloud sync, import and HealthKit remain deferred.
 
 ## Architecture reference
 
