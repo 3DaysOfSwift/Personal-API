@@ -247,3 +247,8 @@ LifeMapFeature/LifeMapManager owns source-backed event candidates; LifeMapExtrac
 Settings opens JournalEntriesView and EditJournalEntryView, each with its own adjacent ViewModel. Both use MomentsFeature; MomentsManager owns validation and serialized publication. LocalDataStore atomically edits/deletes the source and removes its derived facts. Edits retain the ID, recorded date and source, reset metadata, and request reprocessing. Revision checks reject stale editor saves/deletes, and in-flight analysis cannot overwrite an edited entry. Life Map revalidates its source cache on refresh; new queries and exports read current storage. Existing saved conversations and files already exported are historical copies and are not rewritten.
 
 Validation includes durable reopen/export after edit/delete, derived-fact invalidation, stale edit rejection, failed deletion publication, failed-save draft retention, shared list updates and processing/edit races. No storage schema migration is required. iPhone UI runtime checks remain separate from shared model tests.
+
+
+## Tidy review and race contracts
+
+See [CFA_TIDY_REVIEW.md](Documentation/CFA_TIDY_REVIEW.md) for screen ownership, actor boundaries, FIFO admission, cancellation policies, and validation limitations. Shared presentation adapters live in `1 - View/Components`; each interactive screen owns its adjacent ViewModel. Run the `PersonalAPI Race Conditions` scheme for controlled feature interleavings.

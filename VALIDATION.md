@@ -1,3 +1,30 @@
+# SwiftUI chat scrolling — 16 September 2026
+
+Removed ChatScrollView, ChatDraftBounds, and their Xcode references. Query now uses SwiftUI ScrollView/ScrollViewReader with native keyboard safe-area handling, interactive dismissal, bottom anchoring and a bottom target including 20 points of padding. A viewport-height change scrolls the focused composer into view. The shared UITextView adapter remains, with the same touch-delay configuration as Training.
+
+iOS presentation source typechecking passed. Shared tests: 128 passed, four skipped, zero failures. No UIViewControllerRepresentable remains in app source. Keyboard timing, interactive dismissal and first-visible bottom positioning need device/Simulator validation; the shared tests cannot establish those UI behaviours. Earlier entries below describe historical implementations.
+
+---
+
+# Unit-test completeness pass — 16 September 2026
+
+**128 passed, four opt-in live-AI tests skipped, zero failed.** All 13 ViewModels have dedicated suites. Added 44 tests and replaced one combined test. Audited all seven managers; coverage instrumentation found no unexecuted manager functions in the shared run. All 31 test source files are registered exactly once in Xcode.
+
+See [Unit-test audit](Documentation/UNIT_TEST_AUDIT.md) for the behaviour map and validation limits. No production Swift code changed in this pass.
+
+---
+
+# CFA tidy verification — 16 September 2026
+
+- Final shared macOS suite: **89 tests, four skipped, zero failures** (85 executed successfully).
+- iOS presentation source typecheck: passed using temporary composition/Observable stand-ins; not a full app build.
+- Xcode target membership: all 67 app Swift files and 25 test Swift files appear exactly once; no missing files or group cycles. Project plist validates.
+- Added the **PersonalAPI Race Conditions** scheme and feature-organized controlled-interleaving suites.
+- Full iPhone Simulator build remains blocked at asset compilation: CoreSimulator reports no available runtimes. Device keyboard, layout and inference checks are outstanding.
+- No claim of exhaustive race freedom. See [CFA tidy review](Documentation/CFA_TIDY_REVIEW.md) for contracts, coverage and remaining acceptance checks.
+
+---
+
 # Unsupported answer correction — 15 September 2026
 
 The user reported an unrecorded claim of loneliness. That phrase matched a fictional
