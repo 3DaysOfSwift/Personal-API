@@ -1,43 +1,135 @@
-# Personal API — first iPhone project
+<p align="center">
+  <img src="readme-images/PersonalAPI-Logo.png" width="160" alt="Personal API fingerprint logo">
+</p>
 
-Open **PersonalAPI.xcodeproj**, choose the **PersonalAPI** scheme and an iPhone simulator, then Run. For a physical iPhone, select your development team under Signing & Capabilities. No packages, API keys or server setup are needed.
+# Personal API — A dataset about you.
 
-- Minimum iOS: 17.0
-- Created and compiled with Xcode 26.2
-- App bundle ID: `com.3DaysOfSwiftConcurrency.PersonalAPI`
-- Test bundle ID: `com.3DaysOfSwiftConcurrency.PersonalAPI.PersonalAPITests`
+**A lifetime, one Moment at a time.**
 
-Read [PRODUCT.md](PRODUCT.md) for scope and principles, and [ARCHITECTURE.md](ARCHITECTURE.md) for data flow and extension boundaries.
+Personal API turns journal entries into a searchable dataset of your life. Capture meaningful Moments, explore your experiences with on-device AI, and export your words in a portable JSON file.
 
-## Try the complete slice
+**Created and published by [3 Days of Swift Concurrency](https://www.3daysofswiftconcurrency.com/).**
 
-1. Start your dataset and log “I had an idea for a garden app”.
-2. Open the saved Moment and inspect its unchanged text and derived title.
-3. Query “garden idea”; expand “Based on 1 Moments” and open its source.
-4. Query “hospital” to check the no-evidence response.
-5. Add a profile fact and export JSON in Settings; inspect the original words and fact.
-6. Relaunch and verify persistence. Enable the privacy lock on a device with authentication configured; background and reopen the app.
+Built with **SwiftUI**, **Swift Concurrency** and **Cooperative Feature Architecture (CFA)**. This repository is a working application and an evolving example of readable, testable iOS code.
 
-## Tests
+## Your life, in your own words
 
-Use Product → Test. 22 tests cover the screen ViewModels, feature failures and concurrency, raw-source/export preservation, and SwiftData persistence. You can also run `swift test` on macOS to execute the same shared Model/ViewModel tests without Simulator. See VALIDATION.md for checks actually completed in this environment.
+- **Training.** Write detailed journal entries and build your dataset over time.
+- **Life Map.** Explore AI-identified experiences and inspect the original passages behind them. One journal entry can describe several Moments.
+- **Personal API.** Ask questions about your life, follow up in a conversation, and inspect the source entries behind answers.
+- **Export.** Save your journal entries, recorded dates, IDs, stored facts and derived metadata in one JSON file. Conversations have a separate export.
+- **Settings.** Edit or delete journal entries, enable the privacy lock, and choose from seven colour themes. Your theme choice persists across launches.
 
-The first processor extracts titles only. Query now uses on-device Foundation Models for semantic search when available (iOS 26+ and Apple Intelligence); other configurations show explicit keyword fallback. Every result opens the original entry. Query also produces a concise on-device answer with optional source inspection. iCloud sync, import and HealthKit remain deferred.
+The dataset is yours to refine. Exporting creates a portable snapshot; it does not upload your journal or train an AI model. Using the file with another AI tool depends on that tool's capabilities.
 
-## Architecture reference
+## Built with Cooperative Feature Architecture
 
-This project now uses Matthew’s numbered AppModel structure from the confirmed Trend repository. Read [AGENTS.md](AGENTS.md), the [canonical template](Documentation/APPMODEL_IOS_APPLICATION_TEMPLATE.md), and the [architecture review](Documentation/ARCHITECTURE_REVIEW.md) before changing the design.
+**CFA gives every responsibility a clear home.** Its purpose here is to keep the app understandable as features grow, change or are removed.
 
-## Try local AI search
+The guiding principles are **KISS and readability**: clear names, straightforward control flow, explicit ownership and small, meaningful components. Compact code is not automatically simple code.
 
-Run the existing PersonalAPI scheme on your iPhone Air simulator with ⌘R; do not
-uninstall the app or erase its simulator. The bundle identifier and SwiftData schema
-are unchanged, so this update uses the same saved journal entries.
+```text
+SwiftUI View → Dedicated ViewModel → Feature API → Feature Manager
+                                                    ├── Worker actors
+                                                    └── Repositories
 
-Open Query and ask about a topic in your entries using different wording. After
-search, check the method label: “On-device AI” confirms semantic retrieval;
-“Keyword search” explains why the model was unavailable or failed. Open the returned
-Moments to judge relevance. Apple Intelligence availability depends on the runtime
-and device; the simulator’s model availability is not assumed from the Mac’s.
+AppModel.live() assembles the shared feature dependencies.
+```
 
-[Apple Foundation Models overview](https://developer.apple.com/videos/play/wwdc2025/286/)
+| Layer | Responsibility in Personal API |
+| --- | --- |
+| SwiftUI Views | Describe content, bindings and presentation; forward user intent. |
+| Dedicated ViewModels | Own each screen's drafts, selection, presentation state and feature interactions. |
+| Feature APIs and managers | Own reusable business behaviour and shared state, independent of a particular screen. Managers expose observable state on the Main Actor. |
+| Worker actors | Perform suitable processing, search and generation work across explicit isolation boundaries. |
+| Repositories | Own persistence and device integration behind injectable interfaces. |
+| AppModel | Construct and connect the live feature graph in one composition root. |
+
+### The engine belongs to the features
+
+The architectural question we use during review is: **if we added another UI target, would this behaviour come with the model, or would we have to copy it out of a ViewModel?**
+
+Validation, journal workflows, retrieval policy and persistence coordination belong to features. Focus, navigation, drafts and visual styling belong to presentation. Small UIKit adapters remain where they support specific interaction requirements: the shared journal editor controls touch responsiveness and keyboard submission.
+
+### Concurrency requires explicit policies
+
+Actors protect isolated state, but an asynchronous operation can suspend and allow other work to enter. Personal API therefore uses explicit operation policies, cancellation handling and checks against stale results. Where whole operations must remain ordered across suspension points, a FIFO asynchronous gate coordinates them without blocking a thread.
+
+The race-condition suites exercise controlled interleavings for Authentication, Conversations, Life Map, Moments, Profile, Query and Settings. Passing these tests is evidence for the cases tested, not proof that all races are impossible.
+
+### A project structure you can navigate
+
+```text
+PersonalAPI/
+├── 1 - View/
+│   ├── Views/             # Screens and adjacent ViewModels
+│   ├── Components/        # Shared presentation components and adapters
+│   └── Theme/             # Named colours, palettes and theme selection
+├── 2 - AppModel/
+│   ├── AppModel.swift     # Feature composition
+│   ├── Features/          # Feature contracts, managers and workers
+│   ├── Operation Scheduling/
+│   └── User Data Storage/
+├── 3 - App Resources/
+└── 4 - Swift Extensions/
+
+PersonalAPITests/
+├── View model tests/
+├── AppModel tests/
+└── Race Conditions/       # Organised by feature
+```
+
+**[Explore the CFA Toolkit on GitHub →](https://github.com/3DaysOfSwift/cooperative-feature-architecture)**
+
+The toolkit provides five AI skills for app creation, architecture adoption, Swift Concurrency migration, architecture review and iterative codebase tidying. They give developers and coding agents a shared set of ownership rules and verification steps. Generated code still needs human review and appropriate testing.
+
+For this app's implementation details, see [ARCHITECTURE.md](ARCHITECTURE.md), the [CFA tidy review](Documentation/CFA_TIDY_REVIEW.md) and [project instructions](AGENTS.md).
+
+## Build and run
+
+1. Open **PersonalAPI.xcodeproj** in Xcode.
+2. Select the **PersonalAPI** scheme and an iPhone simulator or connected iPhone.
+3. For a physical device, select your development team under **Signing & Capabilities**.
+4. Run the app.
+
+- Minimum deployment target: **iOS 17.0**.
+- Project developed with **Xcode 26.2**.
+- No third-party packages, API keys or server setup are required.
+- On-device semantic search, answer generation and Life Map require **iOS 26+ and an available Apple Intelligence model**. Model availability must be checked on the actual device or runtime. Query includes keyword fallback; Life Map reports model unavailability.
+
+## Try the app
+
+1. Write a journal entry in **Training**. Include details you can ask about later.
+2. Open the saved Moment and inspect your words and its derived metadata.
+3. Ask a related question in **Personal API**, then inspect its sources.
+4. Open **Life Map** on a supported device to explore identified experiences.
+5. Export your dataset from **Export** and inspect the JSON.
+6. Use **Settings → Manage journal entries** to refine an entry. Select a colour theme and relaunch to check that it is restored.
+
+## Tests and verification
+
+Run **Product → Test** with the PersonalAPI scheme for the Xcode test target. Additional schemes select race-condition tests and opt-in live-AI evaluations.
+
+For shared Model and presentation-state tests on macOS:
+
+```sh
+swift test
+```
+
+The latest local shared-suite run on **16 September 2026** completed with **130 passed, four opt-in live-AI checks skipped, and zero failures**. Coverage includes dedicated suites for all 13 screen ViewModels, feature behaviours, persistence, theme restoration and controlled concurrency cases.
+
+The macOS harness does not exercise iPhone rendering or UIKit keyboard interaction. Recent UI changes passed source typechecking; Simulator access was unavailable for visual verification. See [VALIDATION.md](VALIDATION.md) and the [unit-test audit](Documentation/UNIT_TEST_AUDIT.md) for recorded checks and their scope; older entries describe earlier project states.
+
+## The publisher and its training
+
+[![3 Days of Swift Concurrency — iOS developer training](readme-images/Publisher-Logo.png)](https://www.3daysofswiftconcurrency.com/)
+
+**[Explore the training at 3DaysOfSwiftConcurrency.com →](https://www.3daysofswiftconcurrency.com/)**
+
+3 Days of Swift Concurrency offers Swift Concurrency training for iOS developers and publishes the CFA Toolkit. Personal API puts those architectural principles into practice in a real application, with source code that developers can inspect and learn from. No course purchase is required to explore this repository.
+
+## Project status
+
+Personal API is under active development. Life Map is experimental, AI results can be incomplete or incorrect, and original journal passages remain available for inspection. iCloud sync, dataset import and HealthKit integration are not implemented.
+
+See [PRODUCT.md](PRODUCT.md) for product principles. When proposing changes, preserve original journal content, keep business behaviour in its owning feature, and include relevant tests and verification details.
