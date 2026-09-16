@@ -15,10 +15,10 @@ struct TrainingView: View {
           JournalTextEditor(
             text: $viewModel.text, isEditing: $viewModel.isMomentFocused,
             isEnabled: !viewModel.isSaving,
-            textColor: UIColor(theme.theme.primary),
-            placeholderColor: UIColor(theme.theme.secondary),
-            surfaceColor: UIColor(theme.theme.surface),
-            accentColor: UIColor(theme.theme.interactiveAccent)
+            textColor: UIColor(theme.palette.primary),
+            placeholderColor: UIColor(theme.palette.secondary),
+            surfaceColor: UIColor(theme.palette.surface),
+            accentColor: UIColor(theme.palette.interactiveAccent)
           )
           .frame(height: 174)
           Button {
@@ -27,7 +27,7 @@ struct TrainingView: View {
             Label("Log Moment", systemImage: "arrow.up").frame(maxWidth: .infinity).padding(8)
           }
           .buttonStyle(PersonalAPIButtonStyle(appearance: .filled)).foregroundStyle(
-            theme.theme.onAccent
+            theme.palette.onAccent
           ).disabled(!viewModel.canSave)
           if viewModel.didSave {
             Text(
@@ -35,20 +35,20 @@ struct TrainingView: View {
                 ? "Moment saved." : "Moment saved. Return to Personal API and ask again."
             ).font(.subheadline)
           }
-          if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
+          if let error = viewModel.error { Text(error).foregroundStyle(theme.palette.error) }
           if viewModel.isLoading { ProgressView("Loading Moments…") }
           if let error = viewModel.loadError {
-            Text(error).foregroundStyle(theme.theme.error)
+            Text(error).foregroundStyle(theme.palette.error)
             Button("Retry loading") { viewModel.requestRetry() }
           }
           if let error = viewModel.enrichmentError {
-            Text(error).font(.footnote).foregroundStyle(theme.theme.secondary)
+            Text(error).font(.footnote).foregroundStyle(theme.palette.secondary)
           }
           Divider().padding(.top, 40)
           Text("RECENT MOMENTS · \(viewModel.moments.count)").font(.caption).tracking(2)
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
           if viewModel.moments.isEmpty {
-            Text("Your first Moment starts today.").foregroundStyle(theme.theme.secondary)
+            Text("Your first Moment starts today.").foregroundStyle(theme.palette.secondary)
           }
           ForEach(viewModel.moments) { moment in
             NavigationLink {
@@ -58,8 +58,8 @@ struct TrainingView: View {
               VStack(alignment: .leading, spacing: 8) {
                 Text(moment.createdAt, format: .dateTime.month().day().hour().minute()).font(
                   .caption
-                ).foregroundStyle(theme.theme.secondary)
-                Text(moment.text).lineLimit(4).foregroundStyle(theme.theme.primary)
+                ).foregroundStyle(theme.palette.secondary)
+                Text(moment.text).lineLimit(4).foregroundStyle(theme.palette.primary)
                   .multilineTextAlignment(.leading)
               }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 4)
             }
@@ -67,8 +67,8 @@ struct TrainingView: View {
           }
         }.padding(24)
       }
-      .background(theme.theme.background)
-      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
+      .background(theme.palette.background)
+      .toolbarBackground(theme.palette.background, for: .navigationBar, .tabBar)
       .onChange(of: viewModel.dismissRequested) { dismiss() }
       .navigationTitle("Personal API").navigationBarTitleDisplayMode(.inline).task {
         await viewModel.load()
@@ -79,7 +79,7 @@ struct TrainingView: View {
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text("PERSONAL API").font(.caption).tracking(4)
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
         }
         if viewModel.isMomentFocused || presentedFromChat {
           ToolbarItem(placement: .topBarTrailing) {

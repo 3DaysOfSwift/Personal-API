@@ -8,7 +8,7 @@ struct RootView: View {
   @State private var tab = AppTab.training
   var body: some View {
     ZStack {
-      theme.theme.background.ignoresSafeArea()
+      theme.palette.background.ignoresSafeArea()
       if viewModel.requiresUnlock {
         LockView()
       } else if viewModel.needsOnboarding {
@@ -43,7 +43,7 @@ struct RootView: View {
             Text("PERSONAL API")
               .font(.caption)
               .tracking(4)
-              .foregroundStyle(theme.theme.secondary)
+              .foregroundStyle(theme.palette.secondary)
           }
           .padding(24)
         }

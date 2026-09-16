@@ -17,9 +17,9 @@ struct SettingsView: View {
             ).disabled(viewModel.authenticating)
             Text(
               "Locks when the app enters the background. Your preview is hidden whenever the app is inactive."
-            ).font(.footnote).foregroundStyle(theme.theme.secondary)
+            ).font(.footnote).foregroundStyle(theme.palette.secondary)
             if let error = viewModel.authenticationError {
-              Text(error).foregroundStyle(theme.theme.error)
+              Text(error).foregroundStyle(theme.palette.error)
             }
           }
           Section("Your data") {
@@ -31,19 +31,19 @@ struct SettingsView: View {
             }.disabled(viewModel.isWorking)
             Text(
               "Includes original Moments, profile facts, IDs, dates and derived metadata. Save a copy somewhere you control."
-            ).font(.footnote).foregroundStyle(theme.theme.secondary)
+            ).font(.footnote).foregroundStyle(theme.palette.secondary)
           }
           Section("Intelligence") {
             LabeledContent("Processor", value: "Local extractive v1")
             Button("Regenerate derived metadata") { viewModel.requestRegenerate() }.disabled(
               viewModel.isWorking)
             if let error = viewModel.enrichmentError {
-              Text(error).foregroundStyle(theme.theme.error)
+              Text(error).foregroundStyle(theme.palette.error)
             }
             Text(
               "Original words are preserved. Life Map uses on-device AI to identify experiences."
             )
-            .font(.footnote).foregroundStyle(theme.theme.secondary)
+            .font(.footnote).foregroundStyle(theme.palette.secondary)
           }
           Section("Personal API · 0.1") {
             LabeledContent("Moments", value: "\(viewModel.momentCount)")
@@ -53,14 +53,14 @@ struct SettingsView: View {
           Section("Colour Themes") {
             ForEach(AppColourTheme.all) { option in
               Button {
-                theme.theme = option
+                theme.palette = option
               } label: {
                 HStack {
                   Text(option.name)
                   Spacer()
-                  if theme.theme == option {
+                  if theme.palette == option {
                     Image(systemName: "checkmark")
-                      .foregroundStyle(theme.theme.interactiveAccent)
+                      .foregroundStyle(theme.palette.interactiveAccent)
                       .accessibilityHidden(true)
                   }
                 }
@@ -68,15 +68,15 @@ struct SettingsView: View {
                 .contentShape(Rectangle())
               }
               .buttonStyle(.automatic)
-              .accessibilityAddTraits(theme.theme == option ? .isSelected : [])
+              .accessibilityAddTraits(theme.palette == option ? .isSelected : [])
             }
           }
           if viewModel.isWorking { ProgressView() }
           if let message = viewModel.message { Section { Text(message) } }
         }
-        .listRowBackground(theme.theme.surface)
-      }.scrollContentBackground(.hidden).background(theme.theme.background)
-        .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar).navigationTitle(
+        .listRowBackground(theme.palette.surface)
+      }.scrollContentBackground(.hidden).background(theme.palette.background)
+        .toolbarBackground(theme.palette.background, for: .navigationBar, .tabBar).navigationTitle(
           "Settings"
         )
         .fileExporter(

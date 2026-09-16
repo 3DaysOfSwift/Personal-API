@@ -139,7 +139,7 @@ struct PersonalAPIButtonStyle: ButtonStyle {
       .frame(minHeight: minimumHeight)
       .foregroundStyle(
         appearance == .outlined
-          ? .white : (appearance == .filled ? theme.theme.onAccent : theme.theme.primary)
+          ? .white : (appearance == .filled ? theme.palette.onAccent : theme.palette.primary)
       )
       .background(background, in: RoundedRectangle(cornerRadius: 12))
       .overlay {
@@ -154,8 +154,8 @@ struct PersonalAPIButtonStyle: ButtonStyle {
   private var background: Color {
     switch appearance {
     case .plain: .clear
-    case .bordered: theme.theme.surface
-    case .filled: theme.theme.accent
+    case .bordered: theme.palette.surface
+    case .filled: theme.palette.accent
     case .outlined: .black
     }
   }

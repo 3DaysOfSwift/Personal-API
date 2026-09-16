@@ -15,7 +15,7 @@ struct QueryView: View {
               if viewModel.turns.isEmpty {
                 Text("New Chat").font(.largeTitle.bold())
                 Text("Search your own personal API and ask questions about your life.")
-                  .foregroundStyle(theme.theme.secondary)
+                  .foregroundStyle(theme.palette.secondary)
               }
               // The draft keeps its row identity when it becomes a saved turn.
               ForEach(0..<viewModel.rowCount, id: \.self) { index in
@@ -31,10 +31,10 @@ struct QueryView: View {
                         set: { viewModel.question = $0 }),
                     isEditing: turn == nil ? $viewModel.isQuestionFocused : .constant(false),
                     isEnabled: turn == nil && !viewModel.isBusy,
-                    textColor: UIColor(theme.theme.primary),
-                    placeholderColor: UIColor(theme.theme.secondary),
-                    surfaceColor: UIColor(theme.theme.surface),
-                    accentColor: UIColor(theme.theme.interactiveAccent),
+                    textColor: UIColor(theme.palette.primary),
+                    placeholderColor: UIColor(theme.palette.secondary),
+                    surfaceColor: UIColor(theme.palette.surface),
+                    accentColor: UIColor(theme.palette.interactiveAccent),
                     placeholderText: "Ask about your life…",
                     accessibilityName: "Chat question",
                     onSend: viewModel.submitQuestion
@@ -70,7 +70,7 @@ struct QueryView: View {
                 Button("Stop", systemImage: "stop.circle") { viewModel.cancelSearch() }
               }
               if let error = viewModel.error {
-                Text(error).foregroundStyle(theme.theme.error)
+                Text(error).foregroundStyle(theme.palette.error)
                 if !viewModel.loaded { Button("Retry loading chats") { viewModel.retryLoading() } }
               }
               // The scroll target includes breathing room below the submit button.
@@ -92,13 +92,13 @@ struct QueryView: View {
           }
         }
       }
-      .background(theme.theme.background)
-      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
+      .background(theme.palette.background)
+      .toolbarBackground(theme.palette.background, for: .navigationBar, .tabBar)
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text("PERSONAL API")
             .font(.caption).tracking(4)
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
             .accessibilityAddTraits(.isHeader)
         }
         ToolbarItem(placement: .topBarLeading) {

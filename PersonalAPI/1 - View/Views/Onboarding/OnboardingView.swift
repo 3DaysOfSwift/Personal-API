@@ -15,14 +15,14 @@ struct OnboardingView: View {
             .clipped()
             .blendMode(.screen)
             .accessibilityHidden(true)
-          Text("PERSONAL API").font(.caption).tracking(4).foregroundStyle(theme.theme.secondary)
+          Text("PERSONAL API").font(.caption).tracking(4).foregroundStyle(theme.palette.secondary)
         }
         Text("A lifetime,\none Moment\nat a time.").font(.largeTitle.bold())
         Text("Build the dataset of yourself that future AI will be able to interrogate.").font(
           .title3)
         Text(
           "Think in years, not days. Capture what matters. Your original words stay on this device, ready to export whenever you choose."
-        ).foregroundStyle(theme.theme.secondary)
+        ).foregroundStyle(theme.palette.secondary)
         Button("Start your dataset") { viewModel.startDataset() }.buttonStyle(
           PersonalAPIButtonStyle(appearance: .outlined, minimumHeight: 44)
         ).frame(maxWidth: .infinity)

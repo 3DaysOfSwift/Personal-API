@@ -12,9 +12,9 @@ struct LifeMapView: View {
           Text(
             "\(viewModel.entryCount) journal entries · \(viewModel.points.count) identified Moments"
           )
-          .foregroundStyle(theme.theme.secondary)
+          .foregroundStyle(theme.palette.secondary)
           Text("Tap a Moment to see the words behind it.").font(.subheadline).foregroundStyle(
-            theme.theme.secondary)
+            theme.palette.secondary)
           if viewModel.isReading {
             ProgressView(
               "Reading your journal… \(viewModel.attemptedCount) of \(viewModel.entryCount)")
@@ -27,13 +27,13 @@ struct LifeMapView: View {
                   selected = point
                 } label: {
                   VStack(spacing: 12) {
-                    Circle().fill(theme.theme.interactiveAccent).frame(width: 12, height: 12)
-                      .shadow(color: theme.theme.accent.opacity(0.8), radius: 12)
+                    Circle().fill(theme.palette.interactiveAccent).frame(width: 12, height: 12)
+                      .shadow(color: theme.palette.accent.opacity(0.8), radius: 12)
                     Text(point.title).font(.subheadline).multilineTextAlignment(.center)
-                      .foregroundStyle(theme.theme.primary).fixedSize(
+                      .foregroundStyle(theme.palette.primary).fixedSize(
                         horizontal: false, vertical: true)
                   }.frame(maxWidth: .infinity, minHeight: 92).padding(12)
-                    .background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 22))
+                    .background(theme.palette.surface, in: RoundedRectangle(cornerRadius: 22))
                 }.buttonStyle(.plain)
               }
             }
@@ -49,26 +49,26 @@ struct LifeMapView: View {
             Text(
               "\(viewModel.processedCount) entries read · \(viewModel.failedCount) couldn’t be processed"
             )
-            .font(.subheadline).foregroundStyle(theme.theme.secondary)
+            .font(.subheadline).foregroundStyle(theme.palette.secondary)
           }
           if let issue = viewModel.issue {
-            Text(issue).foregroundStyle(theme.theme.secondary)
+            Text(issue).foregroundStyle(theme.palette.secondary)
             Button("Try again") { viewModel.requestRefresh() }.disabled(viewModel.isReading)
           }
           Text(
             "AI interpretations, grounded in your original words. Related entries may describe the same event; this experiment does not merge them yet."
           )
-          .font(.footnote).foregroundStyle(theme.theme.secondary)
+          .font(.footnote).foregroundStyle(theme.palette.secondary)
         }.padding(24)
       }
-      .background(theme.theme.background)
-      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
+      .background(theme.palette.background)
+      .toolbarBackground(theme.palette.background, for: .navigationBar, .tabBar)
       .navigationTitle("Personal API").navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text("PERSONAL API")
             .font(.caption).tracking(4)
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
             .accessibilityAddTraits(.isHeader)
         }
       }
@@ -80,17 +80,17 @@ struct LifeMapView: View {
             VStack(alignment: .leading, spacing: 24) {
               Text(point.title).font(.title.bold())
               Text("FROM YOUR JOURNAL").font(.caption).tracking(2).foregroundStyle(
-                theme.theme.secondary)
+                theme.palette.secondary)
               Text(point.passage).textSelection(.enabled)
               Text(
                 "Recorded \(point.source.createdAt.formatted(date: .abbreviated, time: .omitted))"
               )
-              .font(.caption).foregroundStyle(theme.theme.secondary)
+              .font(.caption).foregroundStyle(theme.palette.secondary)
               NavigationLink("Read original entry") { MomentDetailView(moment: point.source) }
             }.padding(24)
           }
-          .background(theme.theme.background)
-          .toolbarBackground(theme.theme.background, for: .navigationBar)
+          .background(theme.palette.background)
+          .toolbarBackground(theme.palette.background, for: .navigationBar)
           .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
               DoneButton { selected = nil }

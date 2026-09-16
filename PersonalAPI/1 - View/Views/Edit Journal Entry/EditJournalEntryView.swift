@@ -10,40 +10,40 @@ struct EditJournalEntryView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: 24) {
         Text(entry.createdAt.formatted(date: .abbreviated, time: .shortened))
-          .font(.subheadline).foregroundStyle(theme.theme.secondary)
+          .font(.subheadline).foregroundStyle(theme.palette.secondary)
         JournalTextEditor(
           text: $viewModel.text, isEditing: $viewModel.editing,
           isEnabled: !viewModel.isWorking,
-          textColor: UIColor(theme.theme.primary),
-          placeholderColor: UIColor(theme.theme.secondary),
-          surfaceColor: UIColor(theme.theme.surface),
-          accentColor: UIColor(theme.theme.interactiveAccent)
+          textColor: UIColor(theme.palette.primary),
+          placeholderColor: UIColor(theme.palette.secondary),
+          surfaceColor: UIColor(theme.palette.surface),
+          accentColor: UIColor(theme.palette.interactiveAccent)
         )
         .frame(minHeight: 260).disabled(viewModel.isWorking)
         Text(
           "Saving updates this journal entry and refreshes its derived information. Its original recorded date stays the same."
         )
-        .font(.footnote).foregroundStyle(theme.theme.secondary)
+        .font(.footnote).foregroundStyle(theme.palette.secondary)
         Button("Save changes") {
           viewModel.requestSave()
         }.buttonStyle(PersonalAPIButtonStyle(appearance: .filled)).disabled(!viewModel.canSave)
         if viewModel.isWorking { ProgressView() }
-        if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
+        if let error = viewModel.error { Text(error).foregroundStyle(theme.palette.error) }
         Divider()
         Button("Delete journal entry", role: .destructive) { viewModel.confirmingDelete = true }
           .disabled(viewModel.isWorking)
       }.padding(24)
     }
     .scrollDismissesKeyboard(.interactively)
-    .background(theme.theme.background)
-    .toolbarBackground(theme.theme.background, for: .navigationBar)
+    .background(theme.palette.background)
+    .toolbarBackground(theme.palette.background, for: .navigationBar)
     .navigationTitle("Edit entry").navigationBarTitleDisplayMode(.inline)
     .navigationBarBackButtonHidden(true)
     .toolbar {
       ToolbarItem(placement: .topBarLeading) {
         Button("Cancel") {
           viewModel.cancel()
-        }.disabled(viewModel.isWorking).tint(theme.theme.interactiveAccent)
+        }.disabled(viewModel.isWorking).tint(theme.palette.interactiveAccent)
       }
       ToolbarItem(placement: .topBarTrailing) {
         if viewModel.editing {

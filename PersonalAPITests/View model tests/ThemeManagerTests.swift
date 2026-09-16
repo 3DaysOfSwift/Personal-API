@@ -5,9 +5,9 @@ import XCTest
 @MainActor final class ThemeManagerTests: XCTestCase {
   func testMissingOrUnknownPreferenceUsesMidnight() {
     let preferences = MemoryPreferences()
-    XCTAssertEqual(ThemeManager(preferences: preferences).theme, .midnight)
+    XCTAssertEqual(ThemeManager(preferences: preferences).palette, .midnight)
     preferences.colourThemeID = "Removed theme"
-    XCTAssertEqual(ThemeManager(preferences: preferences).theme, .midnight)
+    XCTAssertEqual(ThemeManager(preferences: preferences).palette, .midnight)
   }
 
   func testEveryThemePersistsAcrossReconstruction() throws {
@@ -17,10 +17,10 @@ import XCTest
     let manager = ThemeManager(preferences: LocalPreferences(defaults: defaults))
 
     for theme in AppColourTheme.all {
-      manager.theme = theme
+      manager.palette = theme
       let restoredDefaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
       let restored = ThemeManager(preferences: LocalPreferences(defaults: restoredDefaults))
-      XCTAssertEqual(restored.theme, theme)
+      XCTAssertEqual(restored.palette, theme)
     }
   }
 }

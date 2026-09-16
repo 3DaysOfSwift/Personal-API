@@ -21,17 +21,17 @@ struct AnswerFeedbackView: View {
           Text(
             "Saved locally to help evaluate answers. This does not train the AI or change your journal."
           ).font(.caption)
-          if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
+          if let error = viewModel.error { Text(error).foregroundStyle(theme.palette.error) }
           Button("Save feedback") {
             viewModel.submit(conversationID: conversationID, turnID: turnID)
           }
           .disabled(viewModel.isSaving)
         }
-        .listRowBackground(theme.theme.surface)
+        .listRowBackground(theme.palette.surface)
       }
       .scrollContentBackground(.hidden)
-      .background(theme.theme.background)
-      .toolbarBackground(theme.theme.background, for: .navigationBar)
+      .background(theme.palette.background)
+      .toolbarBackground(theme.palette.background, for: .navigationBar)
       .navigationTitle("Answer feedback")
       .toolbar { Button("Cancel") { dismiss() } }
       .onChange(of: viewModel.saved) { if viewModel.saved { dismiss() } }

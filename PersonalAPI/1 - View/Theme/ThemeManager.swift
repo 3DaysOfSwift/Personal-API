@@ -2,7 +2,7 @@ import Observation
 import SwiftUI
 
 @MainActor @Observable final class ThemeManager {
-  var theme: AppColourTheme {
+  var palette: AppColourTheme {
     didSet { preferences.colourThemeID = theme.id }
   }
 
@@ -10,6 +10,6 @@ import SwiftUI
 
   init(preferences: any PreferencesRepository) {
     self.preferences = preferences
-    theme = AppColourTheme.all.first { $0.id == preferences.colourThemeID } ?? .midnight
+    palette = AppColourTheme.all.first { $0.id == preferences.colourThemeID } ?? .midnight
   }
 }

@@ -18,11 +18,11 @@ struct ChatAnswerView: View {
       if let details = failureDetails {
         DisclosureGroup("What happened?") {
           Text(details).font(.caption)
-        }.font(.subheadline).foregroundStyle(theme.theme.secondary)
+        }.font(.subheadline).foregroundStyle(theme.palette.secondary)
       }
       if turn.result?.generatedAnswer?.contextLimited == true {
         Text("This answer used excerpts. Some journal text was outside the answer context.")
-          .font(.caption).foregroundStyle(theme.theme.secondary)
+          .font(.caption).foregroundStyle(theme.palette.secondary)
       }
       if let result = turn.result, !result.evidence.isEmpty {
         DisclosureGroup("Sources") {
@@ -40,14 +40,14 @@ struct ChatAnswerView: View {
                 .multilineTextAlignment(.leading).padding(.vertical, 8)
             }
           }
-        }.font(.subheadline).foregroundStyle(theme.theme.secondary)
+        }.font(.subheadline).foregroundStyle(theme.palette.secondary)
       }
       if isLatest {
         Button {
           retry()
         } label: {
           Label("Answer again", systemImage: "arrow.clockwise")
-            .foregroundStyle(theme.theme.interactiveAccent)
+            .foregroundStyle(theme.palette.interactiveAccent)
             .frame(minHeight: 40)
         }
         .buttonStyle(.plain)
@@ -57,7 +57,7 @@ struct ChatAnswerView: View {
           logMoment()
         } label: {
           Label("Log a moment about this", systemImage: "square.and.pencil")
-            .foregroundStyle(theme.theme.interactiveAccent)
+            .foregroundStyle(theme.palette.interactiveAccent)
             .frame(minHeight: 40)
         }
         .buttonStyle(.plain)
@@ -65,7 +65,7 @@ struct ChatAnswerView: View {
         .disabled(isBusy)
         if turn.result?.needsMoreMemories == true {
           Text("The more you log, the more useful your Personal API can become.")
-            .font(.caption).foregroundStyle(theme.theme.secondary)
+            .font(.caption).foregroundStyle(theme.palette.secondary)
         }
       }
       if turn.result?.generatedAnswer != nil {
@@ -79,7 +79,7 @@ struct ChatAnswerView: View {
         }.font(.caption).buttonStyle(PersonalAPIButtonStyle(appearance: .bordered)).disabled(isBusy)
         if turn.feedback != nil {
           Text("Feedback saved for this answer.").font(.caption)
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
         }
       }
     }

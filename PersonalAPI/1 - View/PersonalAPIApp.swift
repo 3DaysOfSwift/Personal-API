@@ -34,8 +34,8 @@ import SwiftUI
       .environment(theme)
       .buttonStyle(PersonalAPIButtonStyle())
       .preferredColorScheme(.dark)
-      .tint(theme.theme.interactiveAccent)
-      .foregroundStyle(theme.theme.primary)
+      .tint(theme.palette.interactiveAccent)
+      .foregroundStyle(theme.palette.primary)
     }
   }
 }

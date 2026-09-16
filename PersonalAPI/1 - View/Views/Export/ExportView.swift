@@ -14,21 +14,21 @@ struct ExportView: View {
           Text(
             "Every Moment you write adds to something uniquely yours: a dataset of your life, in your own words."
           )
-          .foregroundStyle(theme.theme.secondary)
+          .foregroundStyle(theme.palette.secondary)
 
           VStack(alignment: .leading, spacing: 16) {
             Image(systemName: "doc.text")
-              .font(.largeTitle).foregroundStyle(theme.theme.interactiveAccent)
+              .font(.largeTitle).foregroundStyle(theme.palette.interactiveAccent)
             Text("Your personal dataset").font(.title2.bold())
             Text(
               "\(viewModel.momentCount) \(viewModel.momentCount == 1 ? "Moment" : "Moments") · One JSON file"
             )
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
             Text("Your words. Your experiences. Context for AI.")
-              .font(.subheadline).foregroundStyle(theme.theme.secondary)
+              .font(.subheadline).foregroundStyle(theme.palette.secondary)
           }
           .frame(maxWidth: .infinity, alignment: .leading).padding(24)
-          .background(theme.theme.surface, in: RoundedRectangle(cornerRadius: 18))
+          .background(theme.palette.surface, in: RoundedRectangle(cornerRadius: 18))
 
           Button {
             viewModel.requestExport()
@@ -45,7 +45,7 @@ struct ExportView: View {
             Text(
               "Your file starts with your first Moment. Add one in Training to begin building your dataset."
             )
-            .font(.subheadline).foregroundStyle(theme.theme.secondary)
+            .font(.subheadline).foregroundStyle(theme.palette.secondary)
           }
           if let message = viewModel.message {
             Text(message).font(.subheadline)
@@ -74,14 +74,14 @@ struct ExportView: View {
         }
         .padding(24)
       }
-      .background(theme.theme.background)
-      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
+      .background(theme.palette.background)
+      .toolbarBackground(theme.palette.background, for: .navigationBar, .tabBar)
       .navigationTitle("Personal API").navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text("PERSONAL API")
             .font(.caption).tracking(4)
-            .foregroundStyle(theme.theme.secondary)
+            .foregroundStyle(theme.palette.secondary)
             .accessibilityAddTraits(.isHeader)
         }
       }
@@ -95,7 +95,7 @@ struct ExportView: View {
   private func section(_ title: String, text: String) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       Text(title).font(.headline)
-      Text(text).foregroundStyle(theme.theme.secondary)
+      Text(text).foregroundStyle(theme.palette.secondary)
     }
   }
 }

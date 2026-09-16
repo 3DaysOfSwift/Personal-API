@@ -9,9 +9,9 @@ struct LockView: View {
       Text("Your life. Yours alone.").font(.title2)
       Button("Unlock Personal API") { viewModel.requestUnlock() }.buttonStyle(
         PersonalAPIButtonStyle(appearance: .filled)
-      ).foregroundStyle(theme.theme.onAccent).disabled(viewModel.authenticating)
+      ).foregroundStyle(theme.palette.onAccent).disabled(viewModel.authenticating)
       if let error = viewModel.error {
-        Text(error).font(.footnote).foregroundStyle(theme.theme.error)
+        Text(error).font(.footnote).foregroundStyle(theme.palette.error)
       }
     }.padding()
   }
