@@ -33,7 +33,10 @@ struct MomentDetailView: View {
             theme.theme.secondary)
         }
       }.padding(24)
-    }.task { await viewModel.load() }.navigationTitle("Moment").navigationBarTitleDisplayMode(
+    }
+    .background(theme.theme.background)
+    .toolbarBackground(theme.theme.background, for: .navigationBar)
+    .task { await viewModel.load() }.navigationTitle("Moment").navigationBarTitleDisplayMode(
       .inline)
   }
 }

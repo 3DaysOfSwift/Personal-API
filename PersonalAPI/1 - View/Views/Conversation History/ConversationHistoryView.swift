@@ -9,25 +9,31 @@ struct ConversationHistoryView: View {
     @Bindable var viewModel = viewModel
     NavigationStack {
       List {
-        if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
-        if viewModel.conversations.isEmpty { Text("Your conversations will appear here.") }
-        ForEach(viewModel.conversations) { chat in
-          Button {
-            selection = chat.id
-            dismiss()
-          } label: {
-            VStack(alignment: .leading, spacing: 6) {
-              Text(chat.title)
-              Text(chat.updatedAt, style: .date).font(.caption).foregroundStyle(
-                theme.theme.secondary)
-            }
-          }.disabled(viewModel.isBusy)
-            .swipeActions {
-              Button("Delete", role: .destructive) { viewModel.pendingDeletion = chat.id }
-                .disabled(viewModel.isBusy)
-            }
+        Group {
+          if let error = viewModel.error { Text(error).foregroundStyle(theme.theme.error) }
+          if viewModel.conversations.isEmpty { Text("Your conversations will appear here.") }
+          ForEach(viewModel.conversations) { chat in
+            Button {
+              selection = chat.id
+              dismiss()
+            } label: {
+              VStack(alignment: .leading, spacing: 6) {
+                Text(chat.title)
+                Text(chat.updatedAt, style: .date).font(.caption).foregroundStyle(
+                  theme.theme.secondary)
+              }
+            }.disabled(viewModel.isBusy)
+              .swipeActions {
+                Button("Delete", role: .destructive) { viewModel.pendingDeletion = chat.id }
+                  .disabled(viewModel.isBusy)
+              }
+          }
         }
+        .listRowBackground(theme.theme.surface)
       }
+      .scrollContentBackground(.hidden)
+      .background(theme.theme.background)
+      .toolbarBackground(theme.theme.background, for: .navigationBar)
       .navigationTitle("Saved chats")
       .toolbar { DoneButton(action: { dismiss() }) }
       .task { await viewModel.load() }

@@ -36,6 +36,7 @@ struct EditJournalEntryView: View {
     }
     .scrollDismissesKeyboard(.interactively)
     .background(theme.theme.background)
+    .toolbarBackground(theme.theme.background, for: .navigationBar)
     .navigationTitle("Edit entry").navigationBarTitleDisplayMode(.inline)
     .navigationBarBackButtonHidden(true)
     .toolbar {

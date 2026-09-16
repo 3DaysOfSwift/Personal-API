@@ -75,6 +75,7 @@ struct ExportView: View {
         .padding(24)
       }
       .background(theme.theme.background)
+      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
       .navigationTitle("Personal API").navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .principal) {

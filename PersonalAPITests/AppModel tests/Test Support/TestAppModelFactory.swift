@@ -79,6 +79,7 @@ actor MemoryRepository: PersonalDataRepository {
   }
 }
 @MainActor final class MemoryPreferences: PreferencesRepository {
+  var colourThemeID: String?
   var onboarded = false
   var lockEnabled = false
 }

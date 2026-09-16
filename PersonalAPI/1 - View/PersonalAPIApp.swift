@@ -17,7 +17,7 @@ import SwiftUI
 
 @main struct PersonalAPIApp: App {
   @UIApplicationDelegateAdaptor(ApplicationDelegate.self) private var delegate
-  @State private var theme = ThemeManager()
+  @State private var theme = ThemeManager(preferences: LocalPreferences(defaults: .standard))
   var body: some Scene {
     WindowGroup {
       Group {

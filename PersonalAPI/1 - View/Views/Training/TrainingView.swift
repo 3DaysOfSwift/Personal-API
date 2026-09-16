@@ -66,26 +66,29 @@ struct TrainingView: View {
             Divider()
           }
         }.padding(24)
-      }.onChange(of: viewModel.dismissRequested) { dismiss() }
-        .navigationTitle("Personal API").navigationBarTitleDisplayMode(.inline).task {
-          await viewModel.load()
+      }
+      .background(theme.theme.background)
+      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
+      .onChange(of: viewModel.dismissRequested) { dismiss() }
+      .navigationTitle("Personal API").navigationBarTitleDisplayMode(.inline).task {
+        await viewModel.load()
+      }
+      .scrollDismissesKeyboard(.interactively)
+      .scrollBounceBehavior(.always, axes: .vertical)
+      .toolbar(.visible, for: .navigationBar)
+      .toolbar {
+        ToolbarItem(placement: .principal) {
+          Text("PERSONAL API").font(.caption).tracking(4)
+            .foregroundStyle(theme.theme.secondary)
         }
-        .scrollDismissesKeyboard(.interactively)
-        .scrollBounceBehavior(.always, axes: .vertical)
-        .toolbar(.visible, for: .navigationBar)
-        .toolbar {
-          ToolbarItem(placement: .principal) {
-            Text("PERSONAL API").font(.caption).tracking(4)
-              .foregroundStyle(theme.theme.secondary)
-          }
-          if viewModel.isMomentFocused || presentedFromChat {
-            ToolbarItem(placement: .topBarTrailing) {
-              DoneButton { viewModel.done() }
-                .accessibilityHint(
-                  viewModel.isMomentFocused ? "Dismisses the keyboard" : "Closes the moment editor")
-            }
+        if viewModel.isMomentFocused || presentedFromChat {
+          ToolbarItem(placement: .topBarTrailing) {
+            DoneButton { viewModel.done() }
+              .accessibilityHint(
+                viewModel.isMomentFocused ? "Dismisses the keyboard" : "Closes the moment editor")
           }
         }
+      }
     }
   }
 }

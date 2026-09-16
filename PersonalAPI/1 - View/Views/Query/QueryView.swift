@@ -92,6 +92,8 @@ struct QueryView: View {
           }
         }
       }
+      .background(theme.theme.background)
+      .toolbarBackground(theme.theme.background, for: .navigationBar, .tabBar)
       .toolbar {
         ToolbarItem(placement: .principal) {
           Text("PERSONAL API")
